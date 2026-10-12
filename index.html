@@ -334,6 +334,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
   if(['calc','profile','checkin'].indexOf(S.tab)<0)S.tab='calc';
   if(!S.profile||typeof S.profile!=='object')S.profile=null;
   if(S.theme==='lemon')S.theme='honey';
+  if(S.theme==='jade')S.theme='green';
   if(typeof S.theme!=='string')S.theme='lavender';
   if(S.role!=='cc'&&S.role!=='pilot')S.role='cc';
   if(S.base!=='HAN'&&S.base!=='SGN')S.base='HAN';
@@ -460,7 +461,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
   }
 
   /* ---------- theme ---------- */
-  var THEMES=[['lavender','Tím lavender',255,0],['jade','Xanh ngọc',172,9],['sky','Xanh trời',208,0],['pink','Hồng sen',335,0],['peach','Cam đào',18,0],['honey','Vàng mật ong',42,11]];
+  var THEMES=[['lavender','Tím lavender',255,0],['green','Xanh lá',140,8],['sky','Xanh trời',208,0],['pink','Hồng sen',335,0],['peach','Cam đào',18,0],['honey','Vàng mật ong',42,11]];
   function applyTheme(id){
     var t=THEMES.filter(function(x){return x[0]===id})[0]||THEMES[0],h=t[2],d=t[3],r=document.documentElement.style;
     var H=function(s,l,a){return 'hsl('+h+','+s+'%,'+l+'%'+(a?','+a:'')+')'};
