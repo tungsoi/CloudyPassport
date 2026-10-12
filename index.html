@@ -128,6 +128,32 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
 .ct[aria-pressed="true"] .cn{color:var(--ink)}
 .ck{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--violet);display:grid;place-items:center}
 .ck svg{width:10px;height:10px}
+.av{border-radius:50%;overflow:hidden;background:#d9d0f8;flex:none}
+.av svg{width:100%;height:auto}
+.pcard{display:flex;align-items:center;gap:14px}
+.pcard .av{width:84px;height:84px;box-shadow:0 0 0 3px var(--panel),0 0 0 4px var(--line)}
+.pinfo{min-width:0}
+.pn{font-size:20px;font-weight:700;letter-spacing:-.01em;overflow-wrap:anywhere}
+.pe{font-size:12px;font-weight:600;color:var(--muted)}
+.prev{display:flex;justify-content:center}
+.prev .av{width:120px;height:120px}
+.nums{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.num{background:var(--accent-soft);border-radius:16px;padding:12px 14px}
+.num b{display:block;font-size:32px;font-weight:700;line-height:1.1;letter-spacing:-.02em;color:var(--navy);font-variant-numeric:tabular-nums}
+.num span{font-size:12px;font-weight:600;color:var(--muted)}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+.btn{font:600 14px var(--f);color:#3a2f8a;background:#ddd5fb;border:1px solid #b9a9f0;border-radius:14px;padding:10px 18px;min-height:46px;cursor:pointer}
+.btn.alt{background:var(--field);color:var(--ink);border-color:var(--line)}
+.btn.danger{color:var(--warn)}
+.swatches{display:flex;flex-wrap:wrap;gap:12px;padding:4px}
+.sw{width:40px;height:40px;border-radius:50%;border:2px solid var(--panel);padding:0;cursor:pointer;box-shadow:0 0 0 1px var(--line)}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 3px var(--violet)}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{font:600 13px var(--f);color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:999px;padding:8px 14px;min-height:40px;cursor:pointer}
+.pill[aria-pressed="true"]{background:var(--accent-soft);color:var(--navy);border-color:var(--violet)}
+.icgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:8px}
+.icb{height:44px;border-radius:12px;border:1px solid var(--line);background:var(--field);font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-size:22px;line-height:1;cursor:pointer;padding:0}
+.icb[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--violet);box-shadow:inset 0 0 0 1px var(--violet)}
 @media (max-width:380px){
   .ev,.gp{grid-template-columns:84px 32px minmax(0,1fr)}
   .t b{font-size:21px}.ev.pick .t b{font-size:27px}
@@ -193,6 +219,47 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
   </div>
   </div>
 
+  <div class="view" id="v-profile" hidden>
+    <section class="card" id="pShow" hidden>
+      <div class="pcard">
+        <div class="av" id="sAv" role="img" aria-label="Avatar của bạn"></div>
+        <div class="pinfo">
+          <div class="pn" id="sNick"></div>
+          <div class="pe" id="sEmp"></div>
+        </div>
+      </div>
+      <div class="nums" style="margin-top:16px">
+        <div class="num"><b id="sDays">0</b><span>ngày bay</span></div>
+        <div class="num"><b id="sCountries">0/0</b><span>quốc gia đã đến</span></div>
+      </div>
+      <p class="tiny" id="sSpan" style="margin-top:12px"></p>
+      <p class="tiny" id="sFirst"></p>
+      <div class="btns" style="margin-top:16px">
+        <button class="btn" type="button" id="pEdit">Sửa hồ sơ</button>
+        <button class="btn alt danger" type="button" id="pDelete">Xoá hồ sơ</button>
+      </div>
+    </section>
+
+    <form class="card" id="pForm" autocomplete="off" novalidate>
+      <h2>Hồ sơ của bạn</h2>
+      <div class="stack">
+        <div class="prev"><div class="av" id="pAv" role="img" aria-label="Xem trước avatar"></div></div>
+        <div class="btns" style="justify-content:center"><button class="btn alt" type="button" id="pDice">Ngẫu nhiên</button></div>
+        <div class="stack" id="pCustom"></div>
+        <div class="group"><b>Icon cute của bạn</b><div class="icgrid" id="pIcons"></div></div>
+        <label for="pNick">Nickname<input id="pNick" type="text" maxlength="20" placeholder="Tên bạn muốn hiển thị"></label>
+        <label for="pEmp">Mã nhân viên (không bắt buộc)<input id="pEmp" type="text" maxlength="16" placeholder="VD: 123456"></label>
+        <label for="pFirst">Ngày chuyến bay đầu tiên<span class="fld"><span class="pv" id="pvFirst"></span><input id="pFirst" type="date"></span></label>
+        <label for="pRoute">Chuyến đó bay đi đâu (không bắt buộc)<input id="pRoute" type="text" maxlength="40" placeholder="VD: SGN - HAN"></label>
+        <p class="tiny" id="pErr" role="alert" style="color:var(--warn);font-weight:600"></p>
+        <div class="btns">
+          <button class="btn" type="submit">Lưu hồ sơ</button>
+          <button class="btn alt" type="button" id="pCancel" hidden>Huỷ</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
   <div class="view" id="v-checkin" hidden>
     <section class="card">
       <div class="sum-top"><span class="sumN" id="sumN">0</span><span class="sumT">/<span id="sumT">0</span></span><span class="sum-l">quốc gia đã đến</span></div>
@@ -211,7 +278,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
 <nav class="tabs" aria-label="Menu">
   <div class="in">
     <button class="tab" type="button" data-tab="calc"><span data-icon="plane"></span>Lịch bay</button>
-    <button class="tab" type="button" disabled><span data-icon="badge"></span>Hồ sơ</button>
+    <button class="tab" type="button" data-tab="profile"><span data-icon="badge"></span>Hồ sơ</button>
     <button class="tab" type="button" data-tab="checkin"><span data-icon="pin"></span>Check-in</button>
   </div>
 </nav>
@@ -253,7 +320,8 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
   }
   var S=load();
   if(!S.visited||typeof S.visited!=='object')S.visited={};
-  if(S.tab!=='checkin')S.tab='calc';
+  if(['calc','profile','checkin'].indexOf(S.tab)<0)S.tab='calc';
+  if(!S.profile||typeof S.profile!=='object')S.profile=null;
   if(S.role!=='cc'&&S.role!=='pilot')S.role='cc';
   if(S.base!=='HAN'&&S.base!=='SGN')S.base='HAN';
   function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
@@ -371,11 +439,85 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
   }
   function show(tab){
     S.tab=tab;save();
-    $('v-calc').hidden=tab!=='calc';$('v-checkin').hidden=tab!=='checkin';
+    $('v-calc').hidden=tab!=='calc';$('v-profile').hidden=tab!=='profile';$('v-checkin').hidden=tab!=='checkin';
     document.querySelectorAll('.tab[data-tab]').forEach(function(b){
       if(b.dataset.tab===tab)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');
     });
     window.scrollTo(0,0);
+  }
+
+  /* ---------- profile ---------- */
+  var SKINS=[['#fbd9bf','#f0c09b'],['#f0bf98','#e0a47c'],['#d39a70','#bd835a'],['#a56a45','#8d5636']];
+  var HAIRS=['#2b2230','#5a3a2a','#a8643a','#d9ae5a','#c9577f','#5b6fd6'];
+  var OUTFITS=['#6c9be8','#17766f','#c9577f','#7b5fd0','#d98a2b'];
+  var STYLES=[['bob','Bob'],['long','Dài'],['bun','Búi'],['pony','Đuôi ngựa']];
+  var ACCS=[['none','Không'],['hat','Mũ'],['glasses','Kính'],['bow','Hoa cài']];
+  var CUTE=['☁️','✈️','⭐','🌸','🐱','🐰','🦋','🍀','🌙','☀️','🍓','🧸','🐧','🌈','🍑','🐻'];
+  var rnd=function(n){return Math.floor(Math.random()*n)};
+  var fmtFull=function(d){return d.split('-').reverse().join('/')};
+  function span(a,b){
+    var y=b.getFullYear()-a.getFullYear(),m=b.getMonth()-a.getMonth(),d=b.getDate()-a.getDate();
+    if(d<0){m--;d+=new Date(b.getFullYear(),b.getMonth(),0).getDate()}
+    if(m<0){y--;m+=12}
+    return {y:y,m:m,d:d};
+  }
+  function avatarSVG(a){
+    var sk=SKINS[a.skin]||SKINS[1],skin=sk[0],shade=sk[1],hair=HAIRS[a.hair]||HAIRS[0],out=OUTFITS[a.outfit]||OUTFITS[0],gold='#e9b44c',ink='#1b2340',back='';
+    if(a.style==='long')back='<path d="M27 60C23 18 97 18 93 60L99 114L21 114Z" fill="'+hair+'"/>';
+    if(a.style==='bob')back='<path d="M27 58C23 18 97 18 93 58L94 86Q60 98 26 86Z" fill="'+hair+'"/>';
+    if(a.style==='pony')back='<path d="M27 56C25 20 95 20 93 56Z" fill="'+hair+'"/><path d="M88 46C108 52 112 82 100 106C98 86 94 74 86 66Z" fill="'+hair+'"/>';
+    if(a.style==='bun')back='<circle cx="60" cy="14" r="12" fill="'+hair+'"/><path d="M27 56C25 20 95 20 93 56Z" fill="'+hair+'"/>';
+    var acc='';
+    if(a.acc==='hat')acc='<rect x="40" y="16" width="40" height="24" rx="7" fill="'+out+'"/><rect x="40" y="33" width="40" height="5" fill="'+gold+'"/>';
+    if(a.acc==='glasses')acc='<g fill="#ffffff" fill-opacity=".22" stroke="'+ink+'" stroke-width="2.4"><circle cx="50" cy="61" r="9"/><circle cx="70" cy="61" r="9"/></g><path d="M59 61h2" stroke="'+ink+'" stroke-width="2.4"/>';
+    if(a.acc==='bow')acc='<g transform="translate(86 36)"><g fill="#ff8fa3"><circle cy="-5" r="4"/><circle cx="5" cy="-1" r="4"/><circle cx="3" cy="4" r="4"/><circle cx="-3" cy="4" r="4"/><circle cx="-5" cy="-1" r="4"/></g><circle r="3" fill="'+gold+'"/></g>';
+    return '<svg viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'+back+
+      '<rect x="52" y="80" width="16" height="24" rx="7" fill="'+shade+'"/>'+
+      '<path d="M16 130C16 106 38 98 60 98C82 98 104 106 104 130Z" fill="'+out+'"/>'+
+      '<path d="M45 99L60 118L75 99Q60 106 45 99Z" fill="'+gold+'"/><circle cx="60" cy="109" r="4" fill="#cf9530"/>'+
+      '<circle cx="34" cy="62" r="5" fill="'+shade+'"/><circle cx="86" cy="62" r="5" fill="'+shade+'"/>'+
+      '<ellipse cx="60" cy="58" rx="26" ry="29" fill="'+skin+'"/>'+
+      '<path d="M33 58C28 26 56 20 66 24C84 26 94 40 87 60C84 46 74 38 60 38C48 38 38 46 33 58Z" fill="'+hair+'"/>'+
+      '<path d="M44 52Q50 49 56 52M64 52Q70 49 76 52" stroke="'+hair+'" stroke-width="2.2" fill="none" stroke-linecap="round"/>'+
+      '<ellipse cx="50" cy="61" rx="2.6" ry="3.4" fill="'+ink+'"/><ellipse cx="70" cy="61" rx="2.6" ry="3.4" fill="'+ink+'"/>'+
+      '<path d="M60 63Q57 69 61 70" stroke="'+shade+'" stroke-width="2" fill="none" stroke-linecap="round"/>'+
+      '<circle cx="44" cy="71" r="5" fill="#ff8fa3" fill-opacity=".35"/><circle cx="76" cy="71" r="5" fill="#ff8fa3" fill-opacity=".35"/>'+
+      '<path d="M53 73Q60 79 67 73" stroke="#b4475f" stroke-width="2.4" fill="none" stroke-linecap="round"/>'+acc+'</svg>';
+  }
+  function randAv(){return {skin:rnd(SKINS.length),hair:rnd(HAIRS.length),style:STYLES[rnd(STYLES.length)][0],outfit:rnd(OUTFITS.length),acc:ACCS[rnd(ACCS.length)][0]}}
+  var editing=false,draft={av:null,icon:CUTE[0]};
+  function buildPickers(){
+    var sw=function(g,label,arr){return '<div class="group"><b>'+label+'</b><div class="swatches">'+arr.map(function(c,i){var col=Array.isArray(c)?c[0]:c;return '<button type="button" class="sw" data-g="'+g+'" data-v="'+i+'" style="background:'+col+'" aria-label="'+label+' '+(i+1)+'" aria-pressed="false"></button>'}).join('')+'</div></div>'};
+    var pl=function(g,label,arr){return '<div class="group"><b>'+label+'</b><div class="pills">'+arr.map(function(a){return '<button type="button" class="pill" data-g="'+g+'" data-v="'+a[0]+'" aria-pressed="false">'+a[1]+'</button>'}).join('')+'</div></div>'};
+    $('pCustom').innerHTML=sw('skin','Màu da',SKINS)+sw('hair','Màu tóc',HAIRS)+pl('style','Kiểu tóc',STYLES)+sw('outfit','Đồng phục',OUTFITS)+pl('acc','Phụ kiện',ACCS);
+    $('pIcons').innerHTML=CUTE.map(function(e,i){return '<button type="button" class="icb" data-ic="'+i+'" aria-label="Icon '+(i+1)+'" aria-pressed="false">'+e+'</button>'}).join('');
+  }
+  function syncDraft(){
+    $('pAv').innerHTML=avatarSVG(draft.av);
+    document.querySelectorAll('#pCustom [data-g]').forEach(function(b){b.setAttribute('aria-pressed',String(String(draft.av[b.dataset.g])===b.dataset.v))});
+    document.querySelectorAll('#pIcons [data-ic]').forEach(function(b){b.setAttribute('aria-pressed',String(CUTE[Number(b.dataset.ic)]===draft.icon))});
+  }
+  function syncFirst(){var v=$('pFirst').value;$('pvFirst').textContent=v?fmtFull(v):'Chọn ngày'}
+  function openForm(p){
+    draft.av=p?Object.assign({},p.avatar):randAv();draft.icon=p?p.icon:CUTE[0];
+    $('pNick').value=p?p.nick:'';$('pEmp').value=p?p.emp:'';$('pFirst').value=p?p.first:'';$('pRoute').value=p?p.route:'';
+    $('pErr').textContent='';$('pCancel').hidden=!p;
+    syncDraft();syncFirst();
+  }
+  function renderProfile(){
+    var p=S.profile,view=!!p&&!editing;
+    $('pShow').hidden=!view;$('pForm').hidden=view;
+    if(!view)return;
+    var t=new Date(),t0=new Date(t.getFullYear(),t.getMonth(),t.getDate()),f=new Date(p.first+'T00:00:00');
+    var days=Math.max(0,Math.round((t0-f)/864e5)),sp=span(f<=t0?f:t0,t0),done=0,total=0;
+    REGIONS.forEach(function(r){r.c.forEach(function(c){total++;if(S.visited[c[0]])done++})});
+    $('sAv').innerHTML=avatarSVG(p.avatar);
+    $('sNick').textContent=p.nick+' '+p.icon;
+    $('sEmp').textContent=p.emp?('Mã nhân viên: '+p.emp):'';$('sEmp').hidden=!p.emp;
+    $('sDays').textContent=days.toLocaleString('vi-VN');
+    $('sCountries').textContent=done+'/'+total;
+    $('sSpan').textContent=days===0?'Hôm nay là ngày bay đầu tiên của bạn.':sp.y+' năm '+sp.m+' tháng '+sp.d+' ngày kể từ chuyến bay đầu tiên.';
+    $('sFirst').textContent='Chuyến bay đầu tiên: '+fmtFull(p.first)+(p.route?' · '+p.route:'');
   }
 
   /* ---------- wiring ---------- */
@@ -395,9 +537,40 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     $('regions').addEventListener('click',function(e){
       var b=e.target.closest('[data-c]');if(!b)return;
       var c=b.dataset.c;if(S.visited[c])delete S.visited[c];else S.visited[c]=true;
-      save();renderCheckin();
+      save();renderCheckin();renderProfile();
     });
-    renderCalc();renderCheckin();show(S.tab);
+    buildPickers();
+    $('pCustom').addEventListener('click',function(e){
+      var b=e.target.closest('[data-g]');if(!b)return;
+      var v=b.dataset.v;draft.av[b.dataset.g]=Number.isNaN(Number(v))?v:Number(v);syncDraft();
+    });
+    $('pIcons').addEventListener('click',function(e){
+      var b=e.target.closest('[data-ic]');if(!b)return;
+      draft.icon=CUTE[Number(b.dataset.ic)];syncDraft();
+    });
+    $('pDice').addEventListener('click',function(){draft.av=randAv();syncDraft()});
+    $('pFirst').addEventListener('input',syncFirst);
+    $('pFirst').addEventListener('click',function(e){try{if(e.target.showPicker)e.target.showPicker()}catch(x){}});
+    $('pForm').addEventListener('submit',function(e){
+      e.preventDefault();
+      var nick=$('pNick').value.trim(),first=$('pFirst').value,err=$('pErr');
+      if(!nick){err.textContent='Nhập nickname của bạn.';return}
+      if(!first){err.textContent='Chọn ngày chuyến bay đầu tiên.';return}
+      if(first>iso(new Date())){err.textContent='Ngày chuyến bay đầu tiên không thể ở tương lai.';return}
+      S.profile={nick:nick,icon:draft.icon,emp:$('pEmp').value.trim(),first:first,route:$('pRoute').value.trim(),avatar:Object.assign({},draft.av)};
+      editing=false;save();renderProfile();window.scrollTo(0,0);
+    });
+    $('pEdit').addEventListener('click',function(){editing=true;openForm(S.profile);renderProfile();window.scrollTo(0,0)});
+    $('pCancel').addEventListener('click',function(){editing=false;renderProfile();window.scrollTo(0,0)});
+    var delT;
+    $('pDelete').addEventListener('click',function(){
+      var b=$('pDelete');
+      if(b.dataset.armed){delete b.dataset.armed;clearTimeout(delT);b.textContent='Xoá hồ sơ';S.profile=null;editing=false;save();openForm(null);renderProfile();window.scrollTo(0,0);return}
+      b.dataset.armed='1';b.textContent='Chạm lần nữa để xoá';
+      delT=setTimeout(function(){delete b.dataset.armed;b.textContent='Xoá hồ sơ'},3000);
+    });
+    openForm(S.profile);
+    renderCalc();renderCheckin();renderProfile();show(S.tab);
   }
   init();
 })();
