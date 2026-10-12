@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#c3b6f4">
+<style>html{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Hộ Chiếu Mây</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one calm 480px column. Slim title bar, flight inputs card, result card, source note. Mist-blue ground, sky-blue accent, warm gold for the pickup time. */
+:root{
+  --bg:#ece8fb; --panel:#ffffff; --field:#f7f5ff; --line:#e0daf6;
+  --ink:#2b2358; --muted:#6a63a0; --sub:#463d8a;
+  --navy:#3a2f8a; --accent:#8f7be0; --accent-text:#4a3aa8; --accent-soft:#e6e0fb; --on-accent:#2b2358;
+  --hl:#f0ecfd; --warn:#c8372d;
+  --amber:#ff8f78; --amber-ink:#b03a22; --amber-soft:#ffe9e2;
+  --violet:#9a86e8; --violet-ink:#5a47c0; --sky:#6c9be8; --sky-ink:#2f5db0; --sky-soft:#e6eefc;
+  --shadow:0 1px 2px rgba(60,40,140,.06),0 10px 24px -14px rgba(60,40,140,.2);
+  --f:'Be Vietnam Pro','Segoe UI',system-ui,-apple-system,sans-serif;
+  color-scheme:light;
+}
+
+*{box-sizing:border-box}
+body{background:#efebfc linear-gradient(180deg,#e2dbfa,#f6f3ff 420px,#ffffff);color:var(--ink);font:400 14px/1.55 var(--f)}
+p{margin:0}
+svg{display:block}
+h2{font-size:16px;font-weight:700;letter-spacing:-.01em;margin:0 0 12px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{max-width:480px;margin:0 auto;padding-inline:16px;padding-block:16px 96px;display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:var(--shadow);min-width:0}
+
+.top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;padding:14px 16px;border-radius:20px;background:linear-gradient(120deg,#c3b6f4,#d9d0f8 75%,#ebe5fc);color:var(--ink)}
+.ttl{font-size:16px;font-weight:700;letter-spacing:-.01em}
+.sub{font-size:12px;color:var(--sub);font-weight:500}
+.upd{font-size:11px;font-weight:600;color:var(--ink);background:rgba(255,255,255,.65);padding:4px 10px;border-radius:999px;white-space:nowrap}
+
+.stack{display:flex;flex-direction:column;gap:14px}
+.duo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.group{display:flex;flex-direction:column;gap:6px;min-width:0}
+.group>b,label{font-size:12px;font-weight:600;color:var(--muted)}
+label{display:flex;flex-direction:column;gap:6px;min-width:0}
+input,select{font:inherit;font-size:16px;font-weight:500;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:46px;width:100%;min-width:0}
+select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;background:var(--field);border:1px solid var(--line);border-radius:14px}
+.seg button{font:600 12px var(--f);color:var(--muted);background:transparent;border:0;border-radius:10px;padding:10px 2px;min-height:44px;min-width:0;cursor:pointer;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:#ddd5fb;color:#3a2f8a;box-shadow:inset 0 0 0 2px #9a86e8}
+.fld{position:relative;display:block}
+.fld .pv{display:block;height:46px;line-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:var(--field);font-size:14px;font-weight:500;color:var(--ink);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.fld.sel .pv{padding-right:34px}
+.fld.sel::after{content:"";position:absolute;right:15px;top:50%;width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:translateY(-70%) rotate(45deg);pointer-events:none}
+.fld input,.fld select{position:absolute;inset:0;width:100%;height:100%;min-height:0;padding:0;border:0;opacity:0;font-size:16px;-webkit-appearance:none;appearance:none;cursor:pointer}
+.fld:focus-within .pv{outline:2px solid var(--accent);outline-offset:1px}
+.chk{flex-direction:row;align-items:center;gap:12px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
+.chk input{width:24px;height:24px;min-height:0;flex:none;padding:0;accent-color:var(--accent)}
+.tiny{font-size:12px;color:var(--muted);line-height:1.6}
+.tiny a{color:var(--accent-text);font-weight:600}
+
+.tl{list-style:none;margin:0;padding:0}
+.ev,.gp{display:grid;grid-template-columns:96px 36px minmax(0,1fr);column-gap:10px;align-items:center}
+.ev{padding:10px 8px;margin-inline:-8px;border-radius:14px}
+.ev.pick{background:var(--amber-soft)}
+.t b{display:block;font-size:24px;font-weight:700;line-height:1.1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.ev.pick .t b{font-size:30px;color:var(--amber-ink)}
+.ev.brf .t b{color:var(--violet-ink)}
+.ev.dep .t b{color:var(--sky-ink)}
+.t span{display:block;margin-top:2px;font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
+.t .warn{color:var(--warn)}
+.rail{align-self:stretch;position:relative;display:grid;place-items:center}
+.rail::before{content:"";position:absolute;left:50%;top:-10px;bottom:-10px;border-left:2px solid var(--line);transform:translateX(-1px)}
+.ev.first .rail::before{top:50%}
+.ev.last .rail::before{bottom:50%}
+.gp .rail::before{top:0;bottom:0}
+.dot{position:relative;z-index:1;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--panel);border:2px solid var(--navy);color:var(--navy)}
+.dot svg{width:17px;height:17px}
+.ev.pick .dot{width:38px;height:38px;background:var(--amber);border-color:var(--amber);color:#5a2305}
+.ev.brf .dot{border-color:var(--violet);color:var(--violet-ink)}
+.ev.dep .dot{border-color:var(--sky);color:var(--sky-ink)}
+[data-icon="plane"] svg{transform:rotate(45deg)}
+.d b{display:block;font-size:14px;font-weight:700}
+.d span{display:block;font-size:12px;font-weight:500;color:var(--muted)}
+.g{padding:7px 0;font-size:11px;font-weight:600;color:var(--muted)}
+.ic{width:36px;height:36px;border-radius:12px;background:#d3e1fa;color:#2f5db0;display:grid;place-items:center;flex:none}
+.ic svg{width:20px;height:20px}
+.lbl{font-size:11px;font-weight:600;color:var(--muted)}
+.term{display:flex;align-items:center;gap:12px;margin-top:12px;padding:10px 12px;border-radius:14px;background:var(--sky-soft)}
+.term b{font-size:15px;font-weight:700}
+.empty{color:var(--muted)}
+
+.tabs{position:fixed;z-index:2147483647;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding:6px 0 calc(6px + env(safe-area-inset-bottom,0px))}
+.tabs .in{max-width:480px;margin:0 auto;padding-inline:16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:2px;font:600 11px var(--f);color:var(--muted);background:none;border:0;border-radius:14px;padding:6px 4px;min-height:52px}
+.tab svg{width:22px;height:22px}
+.tab[aria-current="page"]{color:var(--navy);background:#ddd5fb}
+.tab:disabled{opacity:.45;cursor:default}
+.top{position:relative;overflow:hidden}
+.brand{display:flex;align-items:center;gap:12px;min-width:0;position:relative;z-index:1}
+.top .upd{position:relative;z-index:1}
+.logo{width:40px;height:40px;flex:none;border-radius:14px;background:#fff;color:#8f7be0;display:grid;place-items:center}
+.logo svg{width:26px;height:26px;fill:currentColor}
+.cl{position:absolute;pointer-events:none;color:#fff}
+.cl svg{display:block;width:100%;height:auto;fill:currentColor}
+.cl.c1{width:58px;top:-8px;right:84px;opacity:.6;animation:drift 9s ease-in-out infinite}
+.cl.c2{width:36px;bottom:-6px;right:14px;opacity:.45;animation:drift 12s ease-in-out infinite reverse}
+.cl.c3{width:44px;bottom:-12px;left:46%;opacity:.35;animation:drift 14s ease-in-out infinite}
+@keyframes drift{0%,100%{transform:translateX(0)}50%{transform:translateX(-8px)}}
+.foot{display:flex;justify-content:center;margin-top:4px}
+@media (prefers-reduced-motion:reduce){.cl{animation:none!important}}
+@media (max-width:380px){
+  .ev,.gp{grid-template-columns:84px 32px minmax(0,1fr)}
+  .t b{font-size:21px}.ev.pick .t b{font-size:27px}
+}
+@media (min-width:420px){.seg button{font-size:13px}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><symbol id="cloud" viewBox="0 0 24 24"><path d="M6.5 18a4.5 4.5 0 0 1-.4-8.98A6 6 0 0 1 17.6 8.3 4.8 4.8 0 0 1 17.5 18z"/></symbol></svg>
+<div class="app">
+  <header class="top">
+    <span class="cl c1" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#cloud"/></svg></span>
+    <span class="cl c2" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#cloud"/></svg></span>
+    <span class="cl c3" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#cloud"/></svg></span>
+    <div class="brand">
+      <span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#cloud"/></svg></span>
+      <div><div class="ttl">Hộ Chiếu Mây</div><div class="sub">Giờ xe đón và họp BRF</div></div>
+    </div>
+    <span class="upd">Quy tắc 21.04.2026</span>
+  </header>
+
+  <section class="card">
+    <h2>Chuyến bay</h2>
+    <div class="stack">
+      <div class="duo">
+        <div class="group"><b>Vai trò</b>
+          <div class="seg" id="roleSeg" role="group" aria-label="Vai trò">
+            <button type="button" data-role="cc" aria-pressed="true">Tiếp viên</button>
+            <button type="button" data-role="pilot" aria-pressed="false">Phi công</button>
+          </div></div>
+        <div class="group"><b>Base</b>
+          <div class="seg" id="baseSeg" role="group" aria-label="Base">
+            <button type="button" data-base="HAN" aria-pressed="true">HAN</button>
+            <button type="button" data-base="SGN" aria-pressed="false">SGN</button>
+          </div></div>
+      </div>
+      <p class="tiny" id="roleNote" hidden>Tại SGN, giờ đón và giờ họp BRF giống nhau cho cả hai vai trò.</p>
+      <label for="fType">Loại chuyến bay<span class="fld sel"><span class="pv" id="pvType"></span><select id="fType"></select></span></label>
+      <div class="duo">
+        <label for="fTime">Giờ cất cánh<span class="fld"><span class="pv" id="pvTime"></span><input id="fTime" type="time"></span></label>
+        <label for="fDate">Ngày bay<span class="fld"><span class="pv" id="pvDate"></span><input id="fDate" type="date"></span></label>
+      </div>
+      <label class="chk" for="fStay"><input id="fStay" type="checkbox"><span>Có ngủ lại (xe đón sớm thêm 15 phút)</span></label>
+    </div>
+  </section>
+
+  <section class="card" aria-live="polite">
+    <h2>Kết quả</h2>
+    <p class="tiny" id="desc" style="margin:-6px 0 12px"></p>
+    <ol class="tl" id="result"></ol>
+    <div class="term" id="term" hidden></div>
+  </section>
+  <div class="foot" aria-hidden="true">
+    <svg viewBox="0 0 240 72" width="240" height="72">
+      <use href="#cloud" x="8" y="28" width="44" height="44" fill="#d9d0f8"/>
+      <use href="#cloud" x="172" y="18" width="58" height="58" fill="#e6e0fb"/>
+      <use href="#cloud" x="92" y="38" width="34" height="34" fill="#cfc4f6"/>
+      <path d="M34 24 Q76 -6 128 16" stroke="#b8a9f0" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round" fill="none"/>
+      <g transform="translate(150 6) rotate(70) scale(.9)" fill="#8f7be0"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></g>
+    </svg>
+  </div>
+</div>
+
+<nav class="tabs" aria-label="Menu">
+  <div class="in">
+    <button class="tab" type="button" aria-current="page"><span data-icon="plane"></span>Lịch bay</button>
+    <button class="tab" type="button" disabled><span data-icon="badge"></span>Hồ sơ</button>
+    <button class="tab" type="button" disabled><span data-icon="pin"></span>Check-in</button>
+  </div>
+</nav>
+
+<script>
+(function(){
+  var KEY='so-tay-to-bay-v1';
+  var WD=['CN','T2','T3','T4','T5','T6','T7'];
+  var STK='fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+  var ICONS={
+    plane:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg>',
+    van:'<svg viewBox="0 0 24 24" '+STK+' aria-hidden="true"><rect x="4" y="3.5" width="16" height="14" rx="3"/><path d="M4 11h16"/><circle cx="8.5" cy="14.2" r=".9" fill="currentColor"/><circle cx="15.5" cy="14.2" r=".9" fill="currentColor"/><path d="M6.5 17.5V20M17.5 17.5V20"/></svg>',
+    badge:'<svg viewBox="0 0 24 24" '+STK+' aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3"/><circle cx="12" cy="10" r="2.6"/><path d="M7.5 17c.8-2.2 2.4-3.2 4.5-3.2s3.7 1 4.5 3.2"/></svg>',
+    pin:'<svg viewBox="0 0 24 24" '+STK+' aria-hidden="true"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>'
+  };
+
+  var $=function(id){return document.getElementById(id)};
+  var p2=function(n){return String(n).padStart(2,'0')};
+  var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+  var iso=function(d){return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())};
+  var fmtT=function(d){return p2(d.getHours())+':'+p2(d.getMinutes())};
+  var fmtD=function(d){return WD[d.getDay()]+' '+p2(d.getDate())+'/'+p2(d.getMonth()+1)};
+  function hydrate(root){
+    root.querySelectorAll('[data-icon]:not([data-done])').forEach(function(el){el.dataset.done='1';el.innerHTML=ICONS[el.dataset.icon]||''});
+  }
+
+  /* ---------- state (extra saved fields from earlier versions are kept untouched) ---------- */
+  function defaults(){
+    var t=new Date();t.setDate(t.getDate()+1);
+    return {role:'cc',base:'HAN',flight:{date:iso(t),time:'07:20',ft:'0',stay:false}};
+  }
+  function load(){
+    var d=defaults();
+    try{
+      var raw=localStorage.getItem(KEY);
+      if(raw){var s=JSON.parse(raw);return Object.assign(d,s,{flight:Object.assign(d.flight,s.flight||{})})}
+    }catch(e){}
+    return d;
+  }
+  var S=load();
+  if(S.role!=='cc'&&S.role!=='pilot')S.role='cc';
+  if(S.base!=='HAN'&&S.base!=='SGN')S.base='HAN';
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+  /* ---------- rules ---------- */
+  /* Rules mirror the Time Calculator tool at timecalcvna.github.io/tinhgio (updated 21.04.2026). Offsets are minutes before departure. */
+  var FTYPES={
+    HAN:[['0','Nội địa, quốc tế ngắn (FT < 4h)'],['1','Quốc tế tầm trung về ngay (4h ≤ FT ≤ 7h, không ký gửi)'],['2','Quốc tế tầm trung, dài (FT ≥ 4h, có ký gửi)'],['3','Cabin Cargo/ Belly Cargo'],['4','Chuyên cơ']],
+    SGN:[['0','Nội địa (B787, A350, A321)'],['1','Quốc tế ngắn (B787, A350, A321), FT < 4h'],['2','Quốc tế tầm trung về ngay (4h ≤ FT ≤ 7h, không ký gửi)'],['3','Quốc tế tầm trung (4h ≤ FT ≤ 7h)'],['4','Quốc tế dài (FT ≥ 7h, Âu, Úc)'],['5','Quốc tế dài (FT ≥ 7h, Mỹ)'],['6','Cabin Cargo/ Belly Cargo'],['7','Chuyên cơ nội địa kết hợp chở khách'],['8','Nội địa (ATR72 Đường bay VCS, CAH, VKG)'],['9','Quốc tế (ATR72)'],['10','Nội địa nối tiếp quốc tế tầm trung, dài có ký gửi'],['11','Nội địa (ATR72 Đường bay DLI, PXU, TBB, BMV)']]
+  };
+  var SGN={
+    pickup:[85,80,80,90,100,130,70,120,60,70,95,75],
+    brf:[105,100,105,115,125,155,85,140,75,85,115,90],
+    term:['Nhà ga T3','Nhà ga T2','Nhà ga T2','Nhà ga T2','Nhà ga T2','Nhà ga T2','Nhà ga T3','Nhà ga T3','Nhà ga T1','Nhà ga T2','Nhà ga T3','Nhà ga T3']
+  };
+  var STAY={HAN:['2'],SGN:['3','4','5','10']};
+  function defStay(){return (STAY[S.base]||[]).indexOf(String(S.flight.ft))>-1}
+  function typeLabel(){
+    var l=FTYPES[S.base],v=String(S.flight.ft),f=l.filter(function(x){return x[0]===v})[0];
+    return (f||l[0])[1];
+  }
+  function buildTypes(){
+    var l=FTYPES[S.base],sel=$('fType');
+    if(!l.some(function(x){return x[0]===String(S.flight.ft)}))S.flight.ft='0';
+    sel.innerHTML=l.map(function(x){return '<option value="'+x[0]+'">'+esc(x[1])+'</option>'}).join('');
+    sel.value=String(S.flight.ft);
+    $('fStay').checked=!!S.flight.stay;
+  }
+  function offsets(){
+    var f=S.flight,l=FTYPES[S.base],t=Number(f.ft),extra=f.stay?15:0;
+    if(!l.some(function(x){return x[0]===String(f.ft)}))t=0;
+    if(S.base==='SGN')return {pick:SGN.pickup[t]+extra,brf:SGN.brf[t],term:SGN.term[t]};
+    var hour=parseInt((f.time||'0').split(':')[0],10)||0,early=hour<8,pilot=S.role==='pilot',pick=0,brf=0;
+    switch(t){
+      case 0:pick=pilot?(early?115:130):(early?120:135);brf=early?90:95;break;
+      case 1:case 2:pick=pilot?140:145;brf=105;break;
+      case 3:pick=pilot?(early?115:125):(early?120:130);brf=90;break;
+      case 4:pick=pilot?140:145;brf=115;break;
+    }
+    return {pick:pick+extra,brf:brf,term:null};
+  }
+  function fmtDur(m){
+    var h=Math.floor(m/60),r=m%60;
+    return (h?h+' giờ':'')+(h&&r?' ':'')+((r||!h)?r+' phút':'');
+  }
+  function compute(){
+    var f=S.flight;if(!f.date||!f.time)return null;
+    var dep=new Date(f.date+'T'+f.time+':00');if(isNaN(dep))return null;
+    var o=offsets();
+    return {dep:dep,o:o,pick:new Date(dep.getTime()-o.pick*60000),brf:new Date(dep.getTime()-o.brf*60000)};
+  }
+  function dayDiff(a,b){
+    return Math.round((new Date(a.getFullYear(),a.getMonth(),a.getDate())-new Date(b.getFullYear(),b.getMonth(),b.getDate()))/864e5);
+  }
+
+  /* ---------- render ---------- */
+  function syncPV(){
+    $('pvType').textContent=typeLabel();
+    $('pvTime').textContent=S.flight.time||'Chọn giờ';
+    var d=S.flight.date,dt=d?new Date(d+'T00:00:00'):null;
+    $('pvDate').textContent=(dt&&!isNaN(dt))?d.split('-').reverse().join('/')+' ('+WD[dt.getDay()]+')':'Chọn ngày';
+  }
+  function renderCalc(){
+    var r=compute(),el=$('result'),tm=$('term');syncPV();
+    document.querySelectorAll('#roleSeg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.role===S.role))});
+    document.querySelectorAll('#baseSeg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.base===S.base))});
+    $('roleNote').hidden=S.base!=='SGN';
+    $('desc').textContent='Lịch chuẩn bị cho '+(S.role==='pilot'?'phi công':'tiếp viên')+' bay '+typeLabel()+' tại base '+S.base+'.'+(S.flight.stay?' Đã cộng thêm 15 phút trước giờ xe đón (chuyến có ngủ lại).':'');
+    if(!r){el.innerHTML='<li class="empty">Chọn ngày và giờ cất cánh để xem giờ xe đón.</li>';tm.hidden=true;return}
+    var items=[
+      {ic:'van',label:'Xe đón',sub:'Trước bay '+fmtDur(r.o.pick),cls:'pick',d:r.pick},
+      {ic:'badge',label:'Họp BRF',sub:'Trước bay '+fmtDur(r.o.brf),cls:'brf',d:r.brf}
+    ].sort(function(a,b){return a.d-b.d});
+    var ev=function(it,pos){
+      var off=dayDiff(it.d,r.dep);
+      return '<li class="ev'+(it.cls?' '+it.cls:'')+(pos?' '+pos:'')+'"><div class="t"><b>'+fmtT(it.d)+'</b><span'+(off<0?' class="warn"':'')+'>'+fmtD(it.d)+(off<0?' · hôm trước':'')+'</span></div><div class="rail"><i class="dot" data-icon="'+it.ic+'"></i></div><div class="d"><b>'+it.label+'</b><span>'+it.sub+'</span></div></li>';
+    };
+    var gp=function(txt){return '<li class="gp"><div></div><div class="rail"></div><div class="g">'+txt+'</div></li>'};
+    el.innerHTML=ev(items[0],'first')+gp('Cách nhau '+fmtDur(Math.abs(r.o.pick-r.o.brf)))+ev(items[1])+gp('')+ev({ic:'plane',label:'Cất cánh',sub:'Giờ địa phương',cls:'dep',d:r.dep},'last');
+    if(r.o.term){tm.innerHTML='<span class="ic" data-icon="pin"></span><div><div class="lbl">Điểm đến</div><b>'+esc(r.o.term)+'</b></div>';tm.hidden=false}else{tm.hidden=true}
+    hydrate(el);hydrate(tm);
+  }
+
+  /* ---------- wiring ---------- */
+  function init(){
+    buildTypes();
+    hydrate(document);
+    $('fDate').value=S.flight.date;$('fTime').value=S.flight.time;
+    $('fDate').addEventListener('input',function(e){S.flight.date=e.target.value;save();renderCalc()});
+    $('fTime').addEventListener('input',function(e){S.flight.time=e.target.value;save();renderCalc()});
+    document.querySelectorAll('#roleSeg button').forEach(function(b){b.addEventListener('click',function(){S.role=b.dataset.role;save();renderCalc()})});
+    document.querySelectorAll('#baseSeg button').forEach(function(b){b.addEventListener('click',function(){S.base=b.dataset.base;S.flight.ft='0';S.flight.stay=defStay();save();buildTypes();renderCalc()})});
+    $('fType').addEventListener('change',function(e){S.flight.ft=e.target.value;S.flight.stay=defStay();$('fStay').checked=S.flight.stay;save();renderCalc()});
+    $('fStay').addEventListener('change',function(e){S.flight.stay=e.target.checked;save();renderCalc()});
+    ['fDate','fTime'].forEach(function(id){$(id).addEventListener('click',function(e){try{if(e.target.showPicker)e.target.showPicker()}catch(x){}})});
+    renderCalc();
+  }
+  init();
+})();
+</script>
+
+</body>
+</html>
