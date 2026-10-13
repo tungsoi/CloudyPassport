@@ -71,8 +71,6 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
 .dy small{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .dy b{display:block;font-size:15px;font-weight:700;color:var(--ink)}
 .dy span{display:block;font-size:12px;font-weight:600;color:var(--accent-text)}
-.shimg{display:block;width:100%;height:auto;border-radius:18px;border:1px solid var(--line);background:var(--field)}
-.msg{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--field);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.6;color:var(--ink)}
 .chk{flex-direction:row;align-items:center;gap:12px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
 .chk input{width:24px;height:24px;min-height:0;flex:none;padding:0;accent-color:var(--accent)}
 .tiny{font-size:12px;color:var(--muted);line-height:1.6}
@@ -231,15 +229,14 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
   </section>
 
   <section class="card" id="shareCard">
-    <h2>Báo tin gia đình</h2>
+    <h2>Chia sẻ chuyến bay</h2>
     <div class="stack">
       <label for="fDest">Hôm nay bay đi đâu<input id="fDest" type="text" list="destList" maxlength="40" placeholder="VD: Tokyo (NRT) hoặc SGN" autocomplete="off"></label>
       <div class="duo">
         <label for="fRetDate">Ngày về dự kiến<span class="fld"><span class="pv" id="pvRetDate"></span><input id="fRetDate" type="date"></span></label>
         <label for="fRetTime">Giờ về dự kiến<span class="fld"><span class="pv" id="pvRetTime"></span><input id="fRetTime" type="time"></span></label>
       </div>
-      <canvas id="shImg" class="shimg" width="1080" height="1300" role="img" aria-label="Ảnh báo tin xem trước"></canvas>
-      <div class="msg" id="shareMsg" aria-label="Nội dung tin nhắn"></div>
+      <canvas id="shImg" width="1080" height="1300" hidden aria-hidden="true"></canvas>
       <div class="btns">
         <button class="btn" type="button" id="shBtn">Chia sẻ ảnh</button>
         <button class="btn alt" type="button" id="shSave">Lưu ảnh</button>
@@ -530,9 +527,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
   }
   function renderShare(){
     var t=shareText();
-    $('shareMsg').textContent=t||'Chọn ngày và giờ cất cánh để tạo tin nhắn.';
     $('shBtn').disabled=$('shSave').disabled=$('shCopy').disabled=!t;
-    $('shImg').hidden=!t;renderImg();
   }
   function copyText(t){
     if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(t);
