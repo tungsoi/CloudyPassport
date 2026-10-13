@@ -165,6 +165,13 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
 .btn{font:600 14px var(--f);color:var(--navy);background:var(--sel);border:1px solid var(--btnb);border-radius:14px;padding:10px 18px;min-height:46px;cursor:pointer}
 .btn.alt{background:var(--field);color:var(--ink);border-color:var(--line)}
 .btn.danger{color:var(--warn)}
+.btns.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.btns.two .btn{width:100%;padding-inline:10px}
+.wxerr{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.wxerr p{margin:0;min-width:0}
+.wxerr .btn{min-height:38px;padding:6px 14px;flex:none}
+.btn:disabled{opacity:.5;cursor:default}
+#shNote:empty{display:none}
 .swatches{display:flex;flex-wrap:wrap;gap:12px;padding:4px}
 .sw{width:40px;height:40px;border-radius:50%;border:2px solid var(--panel);padding:0;cursor:pointer;box-shadow:0 0 0 1px var(--line)}
 .sw[aria-pressed="true"]{box-shadow:0 0 0 3px var(--violet)}
@@ -237,10 +244,9 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
         <label for="fRetTime">Giờ về dự kiến<span class="fld"><span class="pv" id="pvRetTime"></span><input id="fRetTime" type="time"></span></label>
       </div>
       <canvas id="shImg" width="1080" height="1300" hidden aria-hidden="true"></canvas>
-      <div class="btns">
+      <div class="btns two">
         <button class="btn" type="button" id="shBtn">Chia sẻ ảnh</button>
         <button class="btn alt" type="button" id="shSave">Lưu ảnh</button>
-        <button class="btn alt" type="button" id="shCopy">Sao chép chữ</button>
       </div>
       <p class="tiny" id="shNote" role="status"></p>
     </div>
@@ -527,7 +533,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
   }
   function renderShare(){
     var t=shareText();
-    $('shBtn').disabled=$('shSave').disabled=$('shCopy').disabled=!t;
+    $('shBtn').disabled=$('shSave').disabled=!t;
   }
   function copyText(t){
     if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(t);
@@ -540,7 +546,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
   }
   function saveImg(b){
     var u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='bao-tin.png';document.body.appendChild(a);a.click();document.body.removeChild(a);
-    setTimeout(function(){URL.revokeObjectURL(u)},4000);shNote('Đã lưu ảnh. Nếu không thấy, nhấn giữ ảnh xem trước để lưu.');
+    setTimeout(function(){URL.revokeObjectURL(u)},4000);shNote('Đã lưu ảnh vào máy.');
   }
   function shNote(m){var n=$('shNote');n.textContent=m;clearTimeout(shNote.t);shNote.t=setTimeout(function(){n.textContent=''},2500)}
   function renderCalc(){
@@ -587,7 +593,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     var g=BASE_GEO[S.base]||BASE_GEO.HAN;$('nowTz').textContent=g.n;
     var box=$('nowDays');
     if(state==='loading'){box.innerHTML='<p class="tiny" style="grid-column:1/-1">Đang tải thời tiết…</p>';return}
-    if(state==='error'){box.innerHTML='<p class="tiny" style="grid-column:1/-1">Không tải được thời tiết (cần có mạng). <button type="button" class="btn alt" id="wxRetry" style="min-height:36px;padding:6px 12px;margin-left:6px">Thử lại</button></p>';return}
+    if(state==='error'){box.innerHTML='<div class="wxerr"><p class="tiny">Không tải được thời tiết, cần có mạng.</p><button type="button" class="btn alt" id="wxRetry">Thử lại</button></div>';return}
     var d=data.daily,labels=['Hôm nay','Ngày mai'];
     box.innerHTML=[0,1].map(function(i){
       if(d.time[i]==null)return '';
@@ -787,13 +793,12 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
       imgBlob().then(function(b){
         var file=new File([b],'bao-tin.png',{type:'image/png'});
         if(navigator.canShare&&navigator.canShare({files:[file]})){
-          return navigator.share({files:[file],text:t}).catch(function(err){if(!err||err.name!=='AbortError')saveImg(b)});
+          return navigator.share({files:[file]}).catch(function(err){if(!err||err.name!=='AbortError')saveImg(b)});
         }
         saveImg(b);
-      },function(){shNote('Không tạo được ảnh, hãy dùng Sao chép chữ.')});
+      },function(){shNote('Không tạo được ảnh.')});
     });
     $('shSave').addEventListener('click',function(){imgBlob().then(saveImg,function(){shNote('Không tạo được ảnh.')})});
-    $('shCopy').addEventListener('click',function(){var t=shareText();if(!t)return;copyText(t).then(function(){shNote('Đã sao chép tin nhắn.')},function(){shNote('Không sao chép được, hãy chép tay nội dung ở trên.')})});
     $('fDate').addEventListener('input',function(e){S.flight.date=e.target.value;save();renderCalc()});
     $('fTime').addEventListener('input',function(e){S.flight.time=e.target.value;save();renderCalc()});
     document.querySelectorAll('#roleSeg button').forEach(function(b){b.addEventListener('click',function(){S.role=b.dataset.role;save();renderCalc()})});
