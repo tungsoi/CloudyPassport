@@ -140,8 +140,8 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
 .rh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .rh h2{margin:0}
 .rc{font-size:12px;font-weight:700;color:var(--navy);background:var(--accent-soft);padding:3px 10px;border-radius:999px;font-variant-numeric:tabular-nums}
-.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:6px}
-.ct{position:relative;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;padding:7px 3px 6px;border:1px solid var(--line);border-radius:12px;background:var(--field);color:var(--ink);font-family:var(--f);cursor:pointer}
+.cgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.ct{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:0;height:54px;padding:4px 4px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);font-family:var(--f);cursor:pointer}
 .ia{font-size:15px;font-weight:700;letter-spacing:.05em;line-height:1.1;color:var(--muted);font-variant-numeric:tabular-nums}
 .ct[aria-pressed="true"] .ia{color:var(--navy)}
 .rh h2 .fl{font-size:22px;filter:none;opacity:1;vertical-align:-3px}
@@ -184,16 +184,19 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
 .stp b{font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;max-width:100%;overflow-wrap:anywhere}
 .stp i{font-style:normal;font-size:8.5px;font-weight:700;letter-spacing:.03em;opacity:.85;max-width:100%}
 /* airport picker */
-.cgs{display:flex;flex-wrap:wrap;gap:12px 14px}
-.cg{flex:1 1 100%;min-width:0}
-.cg.sm{flex:0 1 auto;min-width:138px}
-.cg.sm .rh{gap:8px}
-.cg .rh{margin-bottom:6px}
-.cg h3{font-size:13px;font-weight:700;margin:0;display:flex;align-items:center;gap:6px}
-.cg h3 .fl{font-size:16px;filter:none;opacity:1}
 .stp.pop{animation:stampPop .5s cubic-bezier(.2,.9,.3,1.2) both}
 @keyframes stampPop{0%{transform:rotate(var(--r)) scale(1.9);opacity:0}55%{opacity:.95;transform:rotate(var(--r)) scale(.92)}100%{transform:rotate(var(--r)) scale(1);opacity:.9}}
 @media (prefers-reduced-motion:reduce){.stp.pop{animation:none}}
+.cc{margin-top:8px;border:1px solid var(--line);border-radius:14px;background:var(--field);overflow:hidden}
+.cc:first-of-type{margin-top:12px}
+.cc summary{list-style:none;display:flex;align-items:center;gap:10px;min-height:48px;padding:0 14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cc summary::-webkit-details-marker{display:none}
+.cc summary::after{content:"";width:8px;height:8px;margin-left:2px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translateY(-2px);transition:transform .2s;flex:none}
+.cc[open] summary::after{transform:rotate(-135deg) translateY(-2px)}
+.cc summary .fl{font-size:22px;filter:none;opacity:1}
+.cc summary b{flex:1;min-width:0;font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cc.has{background:var(--accent-soft);border-color:var(--violet)}
+.cc .cgrid{padding:2px 12px 14px}
 .wxpick{margin-bottom:12px}
 .wxerr{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .wxerr p{margin:0;min-width:0}
@@ -724,6 +727,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     $('ppCount').textContent=n+'/'+tot+' dấu';
     $('ppHint').hidden=true;
   }
+  var openC={'Việt Nam':true};
   function renderCheckin(){
     var st=stats(),pct=st.ap?Math.round(st.apDone/st.ap*100):0;
     $('sumN').textContent=st.apDone;$('sumT').textContent=st.ap;
@@ -733,9 +737,9 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     var out='';
     COUNTRIES.forEach(function(c){
       var d=c[2].filter(function(a){return S.visited[a[0]]}).length;
-      out+='<div class="cg'+(c[2].length<=2?' sm':'')+'"><div class="rh"><h3><span class="fl" aria-hidden="true">'+c[1]+'</span> '+esc(c[0])+'</h3><span class="rc">'+d+'/'+c[2].length+'</span></div><div class="cgrid"'+(c[2].length<=2?' style="grid-template-columns:repeat('+c[2].length+',66px)"':'')+'>'+c[2].map(tile).join('')+'</div></div>';
+      out+='<details class="cc'+(d?' has':'')+'" data-k="'+esc(c[0])+'"'+(openC[c[0]]?' open':'')+'><summary><span class="fl" aria-hidden="true">'+c[1]+'</span><b>'+esc(c[0])+'</b><span class="rc">'+d+'/'+c[2].length+'</span></summary><div class="cgrid">'+c[2].map(tile).join('')+'</div></details>';
     });
-    $('regions').innerHTML='<section class="card" id="apCard"><h2>Chọn sân bay đã đến</h2><div class="cgs">'+out+'</div></section>';
+    $('regions').innerHTML='<section class="card" id="apCard"><h2>Chọn sân bay đã đến</h2>'+out+'</section>';
   }
   function show(tab){
     S.tab=tab;save();
@@ -876,6 +880,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     $('fStay').addEventListener('change',function(e){S.flight.stay=e.target.checked;save();renderCalc()});
     ['fDate'].forEach(function(id){$(id).addEventListener('click',function(e){try{if(e.target.showPicker)e.target.showPicker()}catch(x){}})});
     document.querySelectorAll('.tab[data-tab]').forEach(function(b){b.addEventListener('click',function(){show(b.dataset.tab)})});
+    $('regions').addEventListener('toggle',function(e){var d=e.target;if(d&&d.tagName==='DETAILS')openC[d.getAttribute('data-k')]=d.open},true);
     $('regions').addEventListener('click',function(e){
       var b=e.target.closest('[data-c]');if(!b)return;
       var c=b.dataset.c;if(S.visited[c])delete S.visited[c];else S.visited[c]=true;
