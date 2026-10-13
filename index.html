@@ -226,7 +226,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
       <p class="tiny" id="roleNote" hidden>Tại SGN, giờ đón và giờ họp BRF giống nhau cho cả hai vai trò.</p>
       <label for="fType">Loại chuyến bay<span class="fld sel"><span class="pv" id="pvType"></span><select id="fType"></select></span></label>
       <div class="duo">
-        <label for="fTime">Giờ cất cánh<span class="fld"><span class="pv" id="pvTime"></span><input id="fTime" type="time"></span></label>
+        <label for="fTime">Giờ cất cánh<span class="fld sel"><span class="pv" id="pvTime"></span><select id="fTime"></select></span></label>
         <label for="fDate">Ngày bay<span class="fld"><span class="pv" id="pvDate"></span><input id="fDate" type="date"></span></label>
       </div>
       <label class="chk" id="fStayRow" for="fStay"><input id="fStay" type="checkbox"><span>Có ngủ lại (xe đón sớm thêm 15 phút)</span></label>
@@ -245,7 +245,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
       <label for="fDest">Hôm nay bay đi đâu<span class="fld sel"><span class="pv" id="pvDest"></span><select id="fDest"></select></span></label>
       <div class="duo">
         <label for="fRetDate">Ngày về dự kiến<span class="fld"><span class="pv" id="pvRetDate"></span><input id="fRetDate" type="date"></span></label>
-        <label for="fRetTime">Giờ về dự kiến<span class="fld"><span class="pv" id="pvRetTime"></span><input id="fRetTime" type="time"></span></label>
+        <label for="fRetTime">Giờ về dự kiến<span class="fld sel"><span class="pv" id="pvRetTime"></span><select id="fRetTime"></select></span></label>
       </div>
       <canvas id="shImg" width="1080" height="1300" hidden aria-hidden="true"></canvas>
       <div class="btns one">
@@ -801,6 +801,10 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
   function init(){
     buildTypes();
     hydrate(document);
+    var r5=function(t){var m=/^(\d{1,2}):(\d{2})$/.exec(t||'');if(!m)return '';var n=Math.round((+m[1]*60+ +m[2])/5)*5;if(n>=1440)n=1435;return p2(Math.floor(n/60))+':'+p2(n%60)};
+    var tOpts=function(empty){var o=empty?'<option value="">Chưa chọn</option>':'';for(var m=0;m<1440;m+=5){var t=p2(Math.floor(m/60))+':'+p2(m%60);o+='<option value="'+t+'">'+t+'</option>'}return o};
+    S.flight.time=r5(S.flight.time)||'07:20';S.flight.retTime=r5(S.flight.retTime);
+    $('fTime').innerHTML=tOpts(false);$('fRetTime').innerHTML=tOpts(true);
     $('fDate').value=S.flight.date;$('fTime').value=S.flight.time;
     var apOpts=function(empty){return (empty?'<option value="">Chưa chọn</option>':'')+COUNTRIES.map(function(c){return '<optgroup label="'+esc(c[1]+' '+c[0])+'">'+c[2].filter(function(a){return AP_GEO[a[0]]}).map(function(a){return '<option value="'+a[0]+'">'+a[0]+' – '+esc(a[1])+'</option>'}).join('')+'</optgroup>'}).join('')};
     var dd=String(S.flight.dest||'').trim().toUpperCase();S.flight.dest=AP_GEO[dd]?dd:'';
@@ -809,7 +813,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     $('fDest').addEventListener('change',function(e){S.flight.dest=e.target.value;save();renderCalc()});
     $('fRetDate').addEventListener('input',function(e){S.flight.retDate=e.target.value;save();syncPV();renderShare()});
     $('fRetTime').addEventListener('input',function(e){S.flight.retTime=e.target.value;save();syncPV();renderShare()});
-    ['fRetDate','fRetTime'].forEach(function(id){$(id).addEventListener('click',function(e){try{if(e.target.showPicker)e.target.showPicker()}catch(x){}})});
+    ['fRetDate'].forEach(function(id){$(id).addEventListener('click',function(e){try{if(e.target.showPicker)e.target.showPicker()}catch(x){}})});
     $('shBtn').addEventListener('click',function(){
       var t=shareText();if(!t)return;
       imgBlob().then(function(b){
@@ -826,7 +830,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     document.querySelectorAll('#baseSeg button').forEach(function(b){b.addEventListener('click',function(){S.base=b.dataset.base;S.flight.ft='0';S.flight.stay=defStay();save();buildTypes();renderCalc()})});
     $('fType').addEventListener('change',function(e){S.flight.ft=e.target.value;S.flight.stay=defStay();$('fStay').checked=S.flight.stay;save();renderCalc()});
     $('fStay').addEventListener('change',function(e){S.flight.stay=e.target.checked;save();renderCalc()});
-    ['fDate','fTime'].forEach(function(id){$(id).addEventListener('click',function(e){try{if(e.target.showPicker)e.target.showPicker()}catch(x){}})});
+    ['fDate'].forEach(function(id){$(id).addEventListener('click',function(e){try{if(e.target.showPicker)e.target.showPicker()}catch(x){}})});
     document.querySelectorAll('.tab[data-tab]').forEach(function(b){b.addEventListener('click',function(){show(b.dataset.tab)})});
     document.querySelectorAll('#fltSeg button').forEach(function(b){b.addEventListener('click',function(){filter=b.dataset.f;renderCheckin()})});
     $('regions').addEventListener('click',function(e){
