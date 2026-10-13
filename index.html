@@ -71,6 +71,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
 .dy small{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .dy b{display:block;font-size:15px;font-weight:700;color:var(--ink)}
 .dy span{display:block;font-size:12px;font-weight:600;color:var(--accent-text)}
+.shimg{display:block;width:100%;height:auto;border-radius:18px;border:1px solid var(--line);background:var(--field)}
 .msg{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--field);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.6;color:var(--ink)}
 .chk{flex-direction:row;align-items:center;gap:12px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
 .chk input{width:24px;height:24px;min-height:0;flex:none;padding:0;accent-color:var(--accent)}
@@ -237,10 +238,12 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
         <label for="fRetDate">Ngày về dự kiến<span class="fld"><span class="pv" id="pvRetDate"></span><input id="fRetDate" type="date"></span></label>
         <label for="fRetTime">Giờ về dự kiến<span class="fld"><span class="pv" id="pvRetTime"></span><input id="fRetTime" type="time"></span></label>
       </div>
+      <canvas id="shImg" class="shimg" width="1080" height="1300" role="img" aria-label="Ảnh báo tin xem trước"></canvas>
       <div class="msg" id="shareMsg" aria-label="Nội dung tin nhắn"></div>
       <div class="btns">
-        <button class="btn" type="button" id="shBtn">Chia sẻ</button>
-        <button class="btn alt" type="button" id="shCopy">Sao chép</button>
+        <button class="btn" type="button" id="shBtn">Chia sẻ ảnh</button>
+        <button class="btn alt" type="button" id="shSave">Lưu ảnh</button>
+        <button class="btn alt" type="button" id="shCopy">Sao chép chữ</button>
       </div>
       <p class="tiny" id="shNote" role="status"></p>
     </div>
@@ -450,23 +453,86 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     return hit?hit[1]+' – '+hit[0]:v;
   }
   function dm(d){return p2(d.getDate())+'/'+p2(d.getMonth()+1)}
-  function shareText(){
-    var r=compute();if(!r)return '';
+  function shareParts(){
+    var r=compute();if(!r)return null;
     var f=S.flight,dest=destName(),dd=dayDiff(r.pick,new Date());
     var when=dd===0?'Hôm nay':dd===1?'Ngày mai':WD[r.pick.getDay()]+' '+dm(r.pick);
-    var L=[when+(dest?' mình bay đi '+dest+'.':' mình có chuyến bay.')];
-    L.push('🚐 Xe đón: '+fmtT(r.pick)+' ('+dm(r.pick)+')');
-    L.push('🛫 Cất cánh: '+fmtT(r.dep)+' ('+dm(r.dep)+')');
+    var name=(S.profile&&S.profile.nick)?S.profile.nick:'mình';
+    var rows=[{ic:'🚐',label:'Xe đón',time:fmtT(r.pick),date:dm(r.pick),c:'pick'},{ic:'🛫',label:'Cất cánh',time:fmtT(r.dep),date:dm(r.dep),c:'dep'}];
     var rd=f.retDate?new Date(f.retDate+'T00:00:00'):null;if(rd&&isNaN(rd))rd=null;
-    if(rd&&f.retTime)L.push('🏠 Dự kiến về: '+f.retTime+' ('+dm(rd)+')');
-    else if(rd)L.push('🏠 Dự kiến về: ngày '+dm(rd));
-    else if(f.retTime)L.push('🏠 Dự kiến về: '+f.retTime);
+    if(rd||f.retTime)rows.push({ic:'🏠',label:'Dự kiến về',time:f.retTime||'',date:rd?dm(rd):'',c:'ret'});
+    return {when:when,name:name,dest:dest,rows:rows};
+  }
+  function shareText(){
+    var P=shareParts();if(!P)return '';
+    var L=[P.when+' '+P.name+(P.dest?' bay đi '+P.dest+'.':' có chuyến bay.')];
+    P.rows.forEach(function(x){
+      if(x.c==='ret')L.push(x.ic+' '+x.label+': '+(x.time?x.time+(x.date?' ('+x.date+')':''):'ngày '+x.date));
+      else L.push(x.ic+' '+x.label+': '+x.time+' ('+x.date+')');
+    });
     return L.join('\n');
+  }
+  var shImgTimer=0,shLoading=null;
+  function cssv(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+  function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+  function drawCard(av){
+    var P=shareParts(),cv=$('shImg'),W=1080,H=1300,c=cv.getContext('2d'),F='"Be Vietnam Pro","Segoe UI",system-ui,sans-serif';
+    cv.width=W;cv.height=H;if(!P){c.clearRect(0,0,W,H);return}
+    var g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,cssv('--bg1')||'#e2dbfa');g.addColorStop(.5,cssv('--bg2')||'#f6f3ff');g.addColorStop(1,'#ffffff');c.fillStyle=g;c.fillRect(0,0,W,H);
+    c.save();c.shadowColor='rgba(40,30,100,.18)';c.shadowBlur=40;c.shadowOffsetY=16;c.fillStyle='#fff';rr(c,60,60,960,1180,56);c.fill();c.restore();
+    c.save();rr(c,60,60,960,1180,56);c.clip();
+    var hg=c.createLinearGradient(60,60,1020,380);hg.addColorStop(0,cssv('--t1'));hg.addColorStop(1,cssv('--t3'));c.fillStyle=hg;c.fillRect(60,60,960,330);c.restore();
+    var cx=540,cy=230,R=112;
+    c.beginPath();c.arc(cx,cy,R+10,0,7);c.fillStyle='#fff';c.fill();
+    c.save();c.beginPath();c.arc(cx,cy,R,0,7);c.clip();c.fillStyle=cssv('--pale');c.fillRect(cx-R,cy-R,R*2,R*2);
+    if(av)c.drawImage(av,cx-R,cy-R+8,R*2,R*2*130/120);else{c.font='120px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('☁️',cx,cy+6)}
+    c.restore();
+    c.textAlign='center';c.textBaseline='alphabetic';
+    var nm=(S.profile&&S.profile.nick)?S.profile.nick+' '+S.profile.icon:'';
+    if(nm){c.fillStyle=cssv('--navy');c.font='700 50px '+F;c.fillText(nm,540,440)}
+    c.fillStyle=cssv('--muted');c.font='600 40px '+F;
+    c.fillText(P.when+' '+P.name+(P.dest?' bay đi':' có chuyến bay'),540,nm?520:470);
+    if(P.dest){
+      var fs=84;c.fillStyle=cssv('--ink');do{c.font='700 '+fs+'px '+F;fs-=4}while(c.measureText(P.dest).width>860&&fs>36);
+      c.fillText(P.dest,540,nm?618:568);
+    }
+    var y=P.dest?680:620,colors={pick:['--amber-soft','--amber-ink'],dep:['--sky-soft','--sky-ink'],ret:['--accent-soft','--navy']};
+    P.rows.forEach(function(x){
+      var cc=colors[x.c];c.fillStyle=cssv(cc[0]);rr(c,100,y,880,132,36);c.fill();
+      c.textAlign='left';c.fillStyle=cssv('--ink');c.font='600 34px '+F;c.fillText(x.ic+'  '+x.label,140,y+58);
+      c.fillStyle=cssv('--muted');c.font='500 28px '+F;if(x.date)c.fillText(x.date,142,y+102);
+      c.textAlign='right';c.fillStyle=cssv(cc[1]);c.font='700 76px '+F;c.fillText(x.time||'--:--',940,y+92);
+      y+=152;
+    });
+    c.textAlign='center';c.fillStyle=cssv('--muted');c.font='600 30px '+F;c.fillText('☁️  Hộ Chiếu Mây',540,1196);
+  }
+  function loadAv(){
+    return new Promise(function(res){
+      if(!S.profile)return res(null);
+      var im=new Image();im.onload=function(){res(im)};im.onerror=function(){res(null)};
+      im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(avatarSVG(S.profile.avatar));
+    });
+  }
+  function renderImg(){
+    clearTimeout(shImgTimer);
+    shImgTimer=setTimeout(function(){
+      var go=function(){loadAv().then(drawCard)};
+      try{if(document.fonts&&document.fonts.load){document.fonts.load('700 40px "Be Vietnam Pro"').then(go,go);return}}catch(e){}
+      go();
+    },150);
+  }
+  function imgBlob(){
+    return new Promise(function(res,rej){
+      var go=function(){loadAv().then(function(av){drawCard(av);$('shImg').toBlob(function(b){b?res(b):rej()},'image/png')})};
+      try{if(document.fonts&&document.fonts.load){document.fonts.load('700 40px "Be Vietnam Pro"').then(go,go);return}}catch(e){}
+      go();
+    });
   }
   function renderShare(){
     var t=shareText();
     $('shareMsg').textContent=t||'Chọn ngày và giờ cất cánh để tạo tin nhắn.';
-    $('shBtn').disabled=$('shCopy').disabled=!t;
+    $('shBtn').disabled=$('shSave').disabled=$('shCopy').disabled=!t;
+    $('shImg').hidden=!t;renderImg();
   }
   function copyText(t){
     if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(t);
@@ -476,6 +542,10 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
       try{document.execCommand('copy')?res():rej()}catch(e){rej(e)}
       document.body.removeChild(a);
     });
+  }
+  function saveImg(b){
+    var u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='bao-tin.png';document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(u)},4000);shNote('Đã lưu ảnh. Nếu không thấy, nhấn giữ ảnh xem trước để lưu.');
   }
   function shNote(m){var n=$('shNote');n.textContent=m;clearTimeout(shNote.t);shNote.t=setTimeout(function(){n.textContent=''},2500)}
   function renderCalc(){
@@ -691,6 +761,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     syncDraft();syncFirst();
   }
   function renderProfile(){
+    renderShare();
     var p=S.profile,view=!!p&&!editing;
     $('pShow').hidden=!view;$('pForm').hidden=view;
     if(!view)return;
@@ -718,9 +789,15 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     ['fRetDate','fRetTime'].forEach(function(id){$(id).addEventListener('click',function(e){try{if(e.target.showPicker)e.target.showPicker()}catch(x){}})});
     $('shBtn').addEventListener('click',function(){
       var t=shareText();if(!t)return;
-      if(navigator.share){navigator.share({text:t}).catch(function(err){if(err&&err.name==='AbortError')return;copyText(t).then(function(){shNote('Đã sao chép tin nhắn, dán vào Zalo hoặc tin nhắn.')},function(){shNote('Không chia sẻ được, hãy chép tay nội dung ở trên.')})})}
-      else copyText(t).then(function(){shNote('Đã sao chép tin nhắn, dán vào Zalo hoặc tin nhắn.')},function(){shNote('Không sao chép được, hãy chép tay nội dung ở trên.')});
+      imgBlob().then(function(b){
+        var file=new File([b],'bao-tin.png',{type:'image/png'});
+        if(navigator.canShare&&navigator.canShare({files:[file]})){
+          return navigator.share({files:[file],text:t}).catch(function(err){if(!err||err.name!=='AbortError')saveImg(b)});
+        }
+        saveImg(b);
+      },function(){shNote('Không tạo được ảnh, hãy dùng Sao chép chữ.')});
     });
+    $('shSave').addEventListener('click',function(){imgBlob().then(saveImg,function(){shNote('Không tạo được ảnh.')})});
     $('shCopy').addEventListener('click',function(){var t=shareText();if(!t)return;copyText(t).then(function(){shNote('Đã sao chép tin nhắn.')},function(){shNote('Không sao chép được, hãy chép tay nội dung ở trên.')})});
     $('fDate').addEventListener('input',function(e){S.flight.date=e.target.value;save();renderCalc()});
     $('fTime').addEventListener('input',function(e){S.flight.time=e.target.value;save();renderCalc()});
