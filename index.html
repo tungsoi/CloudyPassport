@@ -71,6 +71,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
 .dy small{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .dy b{display:block;font-size:15px;font-weight:700;color:var(--ink)}
 .dy span{display:block;font-size:12px;font-weight:600;color:var(--accent-text)}
+.msg{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--field);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.6;color:var(--ink)}
 .chk{flex-direction:row;align-items:center;gap:12px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
 .chk input{width:24px;height:24px;min-height:0;flex:none;padding:0;accent-color:var(--accent)}
 .tiny{font-size:12px;color:var(--muted);line-height:1.6}
@@ -228,6 +229,24 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     <div class="term" id="term" hidden></div>
   </section>
 
+  <section class="card" id="shareCard">
+    <h2>Báo tin gia đình</h2>
+    <div class="stack">
+      <label for="fDest">Hôm nay bay đi đâu<input id="fDest" type="text" list="destList" maxlength="40" placeholder="VD: Tokyo (NRT) hoặc SGN" autocomplete="off"></label>
+      <div class="duo">
+        <label for="fRetDate">Ngày về dự kiến<span class="fld"><span class="pv" id="pvRetDate"></span><input id="fRetDate" type="date"></span></label>
+        <label for="fRetTime">Giờ về dự kiến<span class="fld"><span class="pv" id="pvRetTime"></span><input id="fRetTime" type="time"></span></label>
+      </div>
+      <div class="msg" id="shareMsg" aria-label="Nội dung tin nhắn"></div>
+      <div class="btns">
+        <button class="btn" type="button" id="shBtn">Chia sẻ</button>
+        <button class="btn alt" type="button" id="shCopy">Sao chép</button>
+      </div>
+      <p class="tiny" id="shNote" role="status"></p>
+    </div>
+    <datalist id="destList"></datalist>
+  </section>
+
   <section class="card" id="nowCard" aria-label="Thời tiết tại base" aria-live="polite">
     <div class="nh"><h2 id="nowTitle">Thời tiết tại HAN</h2><span class="rc" id="nowTz">Nội Bài</span></div>
     <div class="days" id="nowDays"></div>
@@ -339,7 +358,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
   /* ---------- state (extra saved fields from earlier versions are kept untouched) ---------- */
   function defaults(){
     var t=new Date();t.setDate(t.getDate()+1);
-    return {role:'cc',base:'HAN',flight:{date:iso(t),time:'07:20',ft:'0',stay:false}};
+    return {role:'cc',base:'HAN',flight:{date:iso(t),time:'07:20',ft:'0',stay:false,dest:'',retDate:'',retTime:''}};
   }
   function load(){
     var d=defaults();
@@ -419,9 +438,48 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     $('pvTime').textContent=S.flight.time||'Chọn giờ';
     var d=S.flight.date,dt=d?new Date(d+'T00:00:00'):null;
     $('pvDate').textContent=(dt&&!isNaN(dt))?d.split('-').reverse().join('/')+' ('+WD[dt.getDay()]+')':'Chọn ngày';
+    var rd=S.flight.retDate,rt=new Date((rd||'')+'T00:00:00');
+    $('pvRetDate').textContent=(rd&&!isNaN(rt))?rd.split('-').reverse().join('/')+' ('+WD[rt.getDay()]+')':'Chọn ngày';
+    $('pvRetTime').textContent=S.flight.retTime||'Chọn giờ';
   }
+  /* ---------- share ---------- */
+  function destName(){
+    var v=(S.flight.dest||'').trim();if(!v)return '';
+    var u=v.toUpperCase(),hit=null;
+    COUNTRIES.forEach(function(c){c[2].forEach(function(a){if(a[0]===u)hit=a})});
+    return hit?hit[1]+' – '+hit[0]:v;
+  }
+  function dm(d){return p2(d.getDate())+'/'+p2(d.getMonth()+1)}
+  function shareText(){
+    var r=compute();if(!r)return '';
+    var f=S.flight,dest=destName(),dd=dayDiff(r.pick,new Date());
+    var when=dd===0?'Hôm nay':dd===1?'Ngày mai':WD[r.pick.getDay()]+' '+dm(r.pick);
+    var L=[when+(dest?' mình bay đi '+dest+'.':' mình có chuyến bay.')];
+    L.push('🚐 Xe đón: '+fmtT(r.pick)+' ('+dm(r.pick)+')');
+    L.push('🛫 Cất cánh: '+fmtT(r.dep)+' ('+dm(r.dep)+')');
+    var rd=f.retDate?new Date(f.retDate+'T00:00:00'):null;if(rd&&isNaN(rd))rd=null;
+    if(rd&&f.retTime)L.push('🏠 Dự kiến về: '+f.retTime+' ('+dm(rd)+')');
+    else if(rd)L.push('🏠 Dự kiến về: ngày '+dm(rd));
+    else if(f.retTime)L.push('🏠 Dự kiến về: '+f.retTime);
+    return L.join('\n');
+  }
+  function renderShare(){
+    var t=shareText();
+    $('shareMsg').textContent=t||'Chọn ngày và giờ cất cánh để tạo tin nhắn.';
+    $('shBtn').disabled=$('shCopy').disabled=!t;
+  }
+  function copyText(t){
+    if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(t);
+    return new Promise(function(res,rej){
+      var a=document.createElement('textarea');a.value=t;a.setAttribute('readonly','');a.style.cssText='position:fixed;opacity:0;top:0;left:0';
+      document.body.appendChild(a);a.select();
+      try{document.execCommand('copy')?res():rej()}catch(e){rej(e)}
+      document.body.removeChild(a);
+    });
+  }
+  function shNote(m){var n=$('shNote');n.textContent=m;clearTimeout(shNote.t);shNote.t=setTimeout(function(){n.textContent=''},2500)}
   function renderCalc(){
-    var r=compute(),el=$('result'),tm=$('term');syncPV();if(wxBase!==S.base){wxBase=S.base;loadWeather()}else renderNow();
+    var r=compute(),el=$('result'),tm=$('term');syncPV();renderShare();if(wxBase!==S.base){wxBase=S.base;loadWeather()}else renderNow();
     document.querySelectorAll('#roleSeg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.role===S.role))});
     document.querySelectorAll('#baseSeg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.base===S.base))});
     $('roleNote').hidden=S.base!=='SGN';
@@ -652,6 +710,18 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     buildTypes();
     hydrate(document);
     $('fDate').value=S.flight.date;$('fTime').value=S.flight.time;
+    $('fDest').value=S.flight.dest||'';$('fRetDate').value=S.flight.retDate||'';$('fRetTime').value=S.flight.retTime||'';
+    $('destList').innerHTML=COUNTRIES.map(function(c){return c[2].map(function(a){return '<option value="'+a[0]+'">'+esc(a[1])+' · '+esc(c[0])+'</option>'}).join('')}).join('');
+    $('fDest').addEventListener('input',function(e){S.flight.dest=e.target.value;save();renderShare()});
+    $('fRetDate').addEventListener('input',function(e){S.flight.retDate=e.target.value;save();syncPV();renderShare()});
+    $('fRetTime').addEventListener('input',function(e){S.flight.retTime=e.target.value;save();syncPV();renderShare()});
+    ['fRetDate','fRetTime'].forEach(function(id){$(id).addEventListener('click',function(e){try{if(e.target.showPicker)e.target.showPicker()}catch(x){}})});
+    $('shBtn').addEventListener('click',function(){
+      var t=shareText();if(!t)return;
+      if(navigator.share){navigator.share({text:t}).catch(function(err){if(err&&err.name==='AbortError')return;copyText(t).then(function(){shNote('Đã sao chép tin nhắn, dán vào Zalo hoặc tin nhắn.')},function(){shNote('Không chia sẻ được, hãy chép tay nội dung ở trên.')})})}
+      else copyText(t).then(function(){shNote('Đã sao chép tin nhắn, dán vào Zalo hoặc tin nhắn.')},function(){shNote('Không sao chép được, hãy chép tay nội dung ở trên.')});
+    });
+    $('shCopy').addEventListener('click',function(){var t=shareText();if(!t)return;copyText(t).then(function(){shNote('Đã sao chép tin nhắn.')},function(){shNote('Không sao chép được, hãy chép tay nội dung ở trên.')})});
     $('fDate').addEventListener('input',function(e){S.flight.date=e.target.value;save();renderCalc()});
     $('fTime').addEventListener('input',function(e){S.flight.time=e.target.value;save();renderCalc()});
     document.querySelectorAll('#roleSeg button').forEach(function(b){b.addEventListener('click',function(){S.role=b.dataset.role;save();renderCalc()})});
