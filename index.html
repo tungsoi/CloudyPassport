@@ -140,17 +140,18 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
 .rh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .rh h2{margin:0}
 .rc{font-size:12px;font-weight:700;color:var(--navy);background:var(--accent-soft);padding:3px 10px;border-radius:999px;font-variant-numeric:tabular-nums}
-.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:10px}
-.ct{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;padding:12px 6px 10px;border:1px solid var(--line);border-radius:16px;background:var(--field);color:var(--ink);font-family:var(--f);cursor:pointer}
-.ia{font-size:18px;font-weight:700;letter-spacing:.05em;line-height:1.1;color:var(--muted);font-variant-numeric:tabular-nums}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:6px}
+.ct{position:relative;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;padding:7px 3px 6px;border:1px solid var(--line);border-radius:12px;background:var(--field);color:var(--ink);font-family:var(--f);cursor:pointer}
+.ia{font-size:15px;font-weight:700;letter-spacing:.05em;line-height:1.1;color:var(--muted);font-variant-numeric:tabular-nums}
 .ct[aria-pressed="true"] .ia{color:var(--navy)}
 .rh h2 .fl{font-size:22px;filter:none;opacity:1;vertical-align:-3px}
 .fl{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-size:30px;line-height:1;filter:grayscale(1);opacity:.5}
-.cn{font-size:12px;font-weight:600;line-height:1.25;text-align:center;color:var(--muted)}
+.cn{font-size:9.5px;font-weight:600;line-height:1.2;text-align:center;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ct[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--violet)}
 .ct[aria-pressed="true"] .fl{filter:none;opacity:1}
 .ct[aria-pressed="true"] .cn{color:var(--ink)}
-.ck{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--violet);display:grid;place-items:center}
+.ck{position:absolute;top:3px;right:3px;width:13px;height:13px;border-radius:50%;background:var(--violet);display:grid;place-items:center}
+.ck svg{width:8px;height:8px}
 .ck svg{width:10px;height:10px}
 .av{border-radius:50%;overflow:hidden;background:var(--pale);flex:none}
 .av svg{width:100%;height:auto}
@@ -170,17 +171,26 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
 .btn.alt{background:var(--field);color:var(--ink);border-color:var(--line)}
 .btn.danger{color:var(--warn)}
 .btns.one .btn{width:100%}
-.ppg{position:relative;border-radius:16px;padding:16px 10px;min-height:170px;background:var(--field);background-image:repeating-linear-gradient(0deg,transparent 0 21px,var(--line) 21px 22px);border:1px solid var(--line);display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:18px 6px;justify-items:center;align-items:center}
+/* passport page */
+.ppg{position:relative;border-radius:16px;padding:14px 6px 12px;min-height:110px;background:var(--field);background-image:radial-gradient(var(--line) 1px,transparent 1.2px);background-size:14px 14px;border:1px solid var(--line);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 2px;justify-items:center;align-items:center}
 .ppg .pe{grid-column:1/-1;align-self:center;text-align:center;color:var(--muted);font-size:13px;font-weight:600;margin:0}
-.stp{--r:0deg;--c:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;text-align:center;padding:10px 8px;min-width:0;max-width:100%;color:var(--c);border:3px double var(--c);transform:rotate(var(--r));filter:url(#rough);opacity:.9;background:transparent;font-weight:700;line-height:1.15}
-.stp.s0{width:118px;height:118px;border-radius:50%}
-.stp.s1{width:136px;height:96px;border-radius:12px}
-.stp.s2{width:140px;height:100px;border-radius:50%/46%}
-.stp.s3{width:128px;height:104px;border-radius:8px;border-style:solid;border-width:2.5px;outline:2px solid var(--c);outline-offset:3px}
-.stp .sf{font-size:26px;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;filter:grayscale(1) contrast(1.15);opacity:.85;line-height:1}
-.stp b{font-size:12px;letter-spacing:.08em;text-transform:uppercase;max-width:100%;overflow-wrap:anywhere}
-.stp i{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.04em;max-width:100%;overflow-wrap:anywhere}
-.stp small{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.75}
+.stp{--r:0deg;--c:var(--navy);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;text-align:center;padding:4px 4px;min-width:0;max-width:100%;color:var(--c);border:2.5px double var(--c);transform:rotate(var(--r));filter:url(#rough);opacity:.92;background:color-mix(in srgb,var(--c) 7%,transparent);font-weight:700;line-height:1.15}
+.stp::after{content:"\2726";position:absolute;top:-6px;right:-3px;font-size:11px;color:var(--c);opacity:.8}
+.stp.s0{width:88px;height:88px;border-radius:50%}
+.stp.s1{width:100px;height:68px;border-radius:14px}
+.stp.s2{width:104px;height:70px;border-radius:50%/48%}
+.stp.s3{width:96px;height:72px;border-radius:12px;border-style:solid;border-width:2px;outline:1.5px dashed var(--c);outline-offset:2px}
+.stp .sf{font-size:22px;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;line-height:1;margin-bottom:1px}
+.stp b{font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;max-width:100%;overflow-wrap:anywhere}
+.stp i{font-style:normal;font-size:8.5px;font-weight:700;letter-spacing:.03em;opacity:.85;max-width:100%}
+/* airport picker */
+.cgs{display:flex;flex-wrap:wrap;gap:12px 14px}
+.cg{flex:1 1 100%;min-width:0}
+.cg.sm{flex:0 1 auto;min-width:138px}
+.cg.sm .rh{gap:8px}
+.cg .rh{margin-bottom:6px}
+.cg h3{font-size:13px;font-weight:700;margin:0;display:flex;align-items:center;gap:6px}
+.cg h3 .fl{font-size:16px;filter:none;opacity:1}
 .stp.pop{animation:stampPop .5s cubic-bezier(.2,.9,.3,1.2) both}
 @keyframes stampPop{0%{transform:rotate(var(--r)) scale(1.9);opacity:0}55%{opacity:.95;transform:rotate(var(--r)) scale(.92)}100%{transform:rotate(var(--r)) scale(1);opacity:.9}}
 @media (prefers-reduced-motion:reduce){.stp.pop{animation:none}}
@@ -339,17 +349,12 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
       <div class="sum-top"><span class="sumN" id="sumN">0</span><span class="sumT">/<span id="sumT">0</span></span><span class="sum-l">sân bay đã đến</span></div>
       <div class="bar" id="sumBarWrap" role="progressbar" aria-label="Số sân bay đã đến" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="sumBar"></i></div>
       <p class="tiny" id="sumHint" style="margin-top:10px"></p>
-      <div class="seg three" id="fltSeg" role="group" aria-label="Lọc sân bay" style="margin-top:14px">
-        <button type="button" data-f="all" aria-pressed="true">Tất cả</button>
-        <button type="button" data-f="yes" aria-pressed="false">Đã đến</button>
-        <button type="button" data-f="no" aria-pressed="false">Chưa đến</button>
-      </div>
     </section>
 
     <section class="card" id="ppCard">
       <div class="nh"><h2>Hộ chiếu của bạn</h2><span class="rc" id="ppCount">0 dấu</span></div>
       <div class="ppg" id="ppPage"></div>
-      <p class="tiny" id="ppHint" style="margin-top:10px"></p>
+      <p class="tiny" id="ppHint" hidden></p>
     </section>
     <div class="view" id="regions"></div>
   </div>
@@ -689,7 +694,6 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     ['Mỹ','🇺🇸',[['SFO','San Francisco'],['LAX','Los Angeles']]],
     ['Canada','🇨🇦',[['YVR','Vancouver']]]
   ];
-  var filter='all';
   function stats(){
     var ap=0,apDone=0,co=COUNTRIES.length,coDone=0;
     COUNTRIES.forEach(function(c){
@@ -712,29 +716,26 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
       var codes=c[2].filter(function(a){return S.visited[a[0]]}).map(function(a){return a[0]});
       tot++;if(!codes.length)return;n++;now[c[0]]=1;
       var h=hash(c[0]),r=(h%19)-9,shape=h%4,col=STAMP_COLORS[(h>>>3)%STAMP_COLORS.length],dy=((h>>>5)%9)-4,pop=stampPrev&&!stampPrev[c[0]];
-      var shown=codes.slice(0,3).join(' · ')+(codes.length>3?' +'+(codes.length-3):'');
-      out+='<div class="stp s'+shape+(pop?' pop':'')+'" style="--r:'+r+'deg;--c:'+col+';margin-top:'+dy+'px"><span class="sf" aria-hidden="true">'+c[1]+'</span><b>'+esc(c[0])+'</b><i>'+shown+'</i><small>'+codes.length+' sân bay</small></div>';
+      var shown=codes.slice(0,2).join(' · ')+(codes.length>2?' +'+(codes.length-2):'');
+      out+='<div class="stp s'+shape+(pop?' pop':'')+'" style="--r:'+r+'deg;--c:'+col+';margin-top:'+dy+'px"><span class="sf" aria-hidden="true">'+c[1]+'</span><b>'+esc(c[0])+'</b><i>'+shown+'</i></div>';
     });
     stampPrev=now;
     $('ppPage').innerHTML=out||'<p class="pe">Hộ chiếu còn trống.<br>Chạm vào sân bay bên dưới để đóng dấu đầu tiên.</p>';
     $('ppCount').textContent=n+'/'+tot+' dấu';
-    $('ppHint').textContent=n?'Mỗi nước đã đến được đóng một con dấu, kèm các sân bay bạn đã đặt chân.':'';
+    $('ppHint').hidden=true;
   }
   function renderCheckin(){
     var st=stats(),pct=st.ap?Math.round(st.apDone/st.ap*100):0;
     $('sumN').textContent=st.apDone;$('sumT').textContent=st.ap;
     $('sumBar').style.width=pct+'%';$('sumBarWrap').setAttribute('aria-valuenow',String(pct));
     $('sumHint').textContent=st.apDone?('Đã đến '+st.coDone+'/'+st.co+' quốc gia. Chạm vào sân bay để bật hoặc tắt.'):'Chạm vào sân bay để đánh dấu đã đến.';
-    document.querySelectorAll('#fltSeg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.f===filter))});
     renderPassport();
     var out='';
     COUNTRIES.forEach(function(c){
-      var list=c[2].filter(function(a){return filter==='all'||(filter==='yes')===!!S.visited[a[0]]});
-      if(!list.length)return;
       var d=c[2].filter(function(a){return S.visited[a[0]]}).length;
-      out+='<section class="card"><div class="rh"><h2><span class="fl" aria-hidden="true">'+c[1]+'</span> '+esc(c[0])+'</h2><span class="rc">'+d+'/'+c[2].length+'</span></div><div class="cgrid">'+list.map(tile).join('')+'</div></section>';
+      out+='<div class="cg'+(c[2].length<=2?' sm':'')+'"><div class="rh"><h3><span class="fl" aria-hidden="true">'+c[1]+'</span> '+esc(c[0])+'</h3><span class="rc">'+d+'/'+c[2].length+'</span></div><div class="cgrid"'+(c[2].length<=2?' style="grid-template-columns:repeat('+c[2].length+',66px)"':'')+'>'+c[2].map(tile).join('')+'</div></div>';
     });
-    $('regions').innerHTML=out||'<section class="card"><p class="empty">Chưa có sân bay nào ở mục này.</p></section>';
+    $('regions').innerHTML='<section class="card" id="apCard"><h2>Chọn sân bay đã đến</h2><div class="cgs">'+out+'</div></section>';
   }
   function show(tab){
     S.tab=tab;save();
@@ -875,7 +876,6 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     $('fStay').addEventListener('change',function(e){S.flight.stay=e.target.checked;save();renderCalc()});
     ['fDate'].forEach(function(id){$(id).addEventListener('click',function(e){try{if(e.target.showPicker)e.target.showPicker()}catch(x){}})});
     document.querySelectorAll('.tab[data-tab]').forEach(function(b){b.addEventListener('click',function(){show(b.dataset.tab)})});
-    document.querySelectorAll('#fltSeg button').forEach(function(b){b.addEventListener('click',function(){filter=b.dataset.f;renderCheckin()})});
     $('regions').addEventListener('click',function(e){
       var b=e.target.closest('[data-c]');if(!b)return;
       var c=b.dataset.c;if(S.visited[c])delete S.visited[c];else S.visited[c]=true;
