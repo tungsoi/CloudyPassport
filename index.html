@@ -169,8 +169,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
 .btn{font:600 14px var(--f);color:var(--navy);background:var(--sel);border:1px solid var(--btnb);border-radius:14px;padding:10px 18px;min-height:46px;cursor:pointer}
 .btn.alt{background:var(--field);color:var(--ink);border-color:var(--line)}
 .btn.danger{color:var(--warn)}
-.btns.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
-.btns.two .btn{width:100%;padding-inline:10px}
+.btns.one .btn{width:100%}
 .wxpick{margin-bottom:12px}
 .wxerr{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .wxerr p{margin:0;min-width:0}
@@ -249,9 +248,8 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
         <label for="fRetTime">Giờ về dự kiến<span class="fld"><span class="pv" id="pvRetTime"></span><input id="fRetTime" type="time"></span></label>
       </div>
       <canvas id="shImg" width="1080" height="1300" hidden aria-hidden="true"></canvas>
-      <div class="btns two">
+      <div class="btns one">
         <button class="btn" type="button" id="shBtn">Chia sẻ ảnh</button>
-        <button class="btn alt" type="button" id="shSave">Lưu ảnh</button>
       </div>
       <p class="tiny" id="shNote" role="status"></p>
     </div>
@@ -547,7 +545,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
   }
   function renderShare(){
     var t=shareText();
-    $('shBtn').disabled=$('shSave').disabled=!t;
+    $('shBtn').disabled=!t;
   }
   function copyText(t){
     if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(t);
@@ -822,7 +820,6 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
         saveImg(b);
       },function(){shNote('Không tạo được ảnh.')});
     });
-    $('shSave').addEventListener('click',function(){imgBlob().then(saveImg,function(){shNote('Không tạo được ảnh.')})});
     $('fDate').addEventListener('input',function(e){S.flight.date=e.target.value;save();renderCalc()});
     $('fTime').addEventListener('input',function(e){S.flight.time=e.target.value;save();renderCalc()});
     document.querySelectorAll('#roleSeg button').forEach(function(b){b.addEventListener('click',function(){S.role=b.dataset.role;save();renderCalc()})});
