@@ -242,7 +242,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
   <section class="card" id="shareCard">
     <h2>Chia sẻ chuyến bay</h2>
     <div class="stack">
-      <label for="fDest">Hôm nay bay đi đâu<input id="fDest" type="text" list="destList" maxlength="40" placeholder="VD: Tokyo (NRT) hoặc SGN" autocomplete="off"></label>
+      <label for="fDest">Hôm nay bay đi đâu<span class="fld sel"><span class="pv" id="pvDest"></span><select id="fDest"></select></span></label>
       <div class="duo">
         <label for="fRetDate">Ngày về dự kiến<span class="fld"><span class="pv" id="pvRetDate"></span><input id="fRetDate" type="date"></span></label>
         <label for="fRetTime">Giờ về dự kiến<span class="fld"><span class="pv" id="pvRetTime"></span><input id="fRetTime" type="time"></span></label>
@@ -253,12 +253,11 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
       </div>
       <p class="tiny" id="shNote" role="status"></p>
     </div>
-    <datalist id="destList"></datalist>
   </section>
 
   <section class="card" id="nowCard" aria-label="Thời tiết tại base" aria-live="polite">
     <div class="nh"><h2 id="nowTitle">Thời tiết tại HAN</h2><span class="rc" id="nowTz">Nội Bài</span></div>
-    <label class="wxpick" for="wxSel">Chọn sân bay<span class="fld sel"><span class="pv" id="pvWx"></span><select id="wxSel"></select></span></label>
+    <label class="wxpick" id="wxPickRow" for="wxSel">Chọn sân bay<span class="fld sel"><span class="pv" id="pvWx"></span><select id="wxSel"></select></span></label>
     <div class="days" id="nowDays"></div>
   </section>
   <div class="foot" aria-hidden="true">
@@ -451,13 +450,12 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     var rd=S.flight.retDate,rt=new Date((rd||'')+'T00:00:00');
     $('pvRetDate').textContent=(rd&&!isNaN(rt))?rd.split('-').reverse().join('/')+' ('+WD[rt.getDay()]+')':'Chọn ngày';
     $('pvRetTime').textContent=S.flight.retTime||'Chọn giờ';
+    var dc=S.flight.dest;$('pvDest').textContent=(dc&&AP_GEO[dc])?(function(i){return i.flag+' '+dc+' – '+i.city})(apInfo(dc)):'Chọn điểm đến';
   }
   /* ---------- share ---------- */
   function destName(){
-    var v=(S.flight.dest||'').trim();if(!v)return '';
-    var u=v.toUpperCase(),hit=null;
-    COUNTRIES.forEach(function(c){c[2].forEach(function(a){if(a[0]===u)hit=a})});
-    return hit?hit[1]+' – '+hit[0]:v;
+    var d=S.flight.dest;if(!d||!AP_GEO[d])return '';
+    return apInfo(d).city+' – '+d;
   }
   function dm(d){return p2(d.getDate())+'/'+p2(d.getMonth()+1)}
   function shareParts(){
@@ -584,7 +582,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
 
   /* ---------- weather at base (Open-Meteo, no key) ---------- */
   var AP_GEO={HAN:[21.2212,105.8072],SGN:[10.8188,106.652],DAD:[16.0439,108.1994],CXR:[11.9982,109.2194],PQC:[10.1698,103.9931],HPH:[20.8194,106.725],VII:[18.7376,105.6708],HUI:[16.4015,107.7026],DLI:[11.75,108.3672],VCA:[10.0851,105.7119],UIH:[13.9549,109.0422],THD:[19.9017,105.4678],VDO:[21.1178,107.4143],BMV:[12.6683,108.1203],PXU:[14.0045,108.0172],VCS:[8.7318,106.633],TBB:[13.0496,109.334],VDH:[17.515,106.5906],VCL:[15.4059,108.7058],DIN:[21.3975,103.0078],VKG:[9.958,105.1317],CAH:[9.1777,105.1778],BKK:[13.69,100.7501],DMK:[13.9126,100.6068],HKT:[8.1132,98.3169],CNX:[18.7668,98.9626],SIN:[1.3644,103.9915],KUL:[2.7456,101.7099],CGK:[-6.1256,106.6559],DPS:[-8.7482,115.1672],MNL:[14.5086,121.0194],PNH:[11.5466,104.8441],REP:[13.4107,103.8128],VTE:[17.9883,102.5633],LPQ:[19.8979,102.1608],RGN:[16.9073,96.1332],ICN:[37.4602,126.4407],PUS:[35.1795,128.9382],NRT:[35.772,140.3929],HND:[35.5494,139.7798],KIX:[34.432,135.2304],NGO:[34.8584,136.8054],FUK:[33.5859,130.4507],CTS:[42.7752,141.6923],PEK:[40.0801,116.5846],PVG:[31.1443,121.8083],CAN:[23.3924,113.2988],CTU:[30.5785,103.9471],KMG:[25.1019,102.9292],TPE:[25.0777,121.2328],KHH:[22.5771,120.35],RMQ:[24.2647,120.6208],HKG:[22.308,113.9185],DEL:[28.5562,77.1],BOM:[19.0896,72.8656],CDG:[49.0097,2.5479],LHR:[51.47,-0.4543],FRA:[50.0379,8.5622],FCO:[41.8003,12.2389],MXP:[45.6306,8.7281],PRG:[50.1008,14.26],SVO:[55.9726,37.4146],SYD:[-33.9399,151.1753],MEL:[-37.669,144.841],SFO:[37.6213,-122.379],LAX:[33.9416,-118.4085],YVR:[49.1967,-123.1815]};
-  function wxAp(){var a=S.wxAp;return (a&&AP_GEO[a])?a:S.base}
+  function wxAp(){var d=S.flight&&S.flight.dest;if(d&&AP_GEO[d])return d;var a=S.wxAp;return (a&&AP_GEO[a])?a:S.base}
   function apInfo(code){var r=null;COUNTRIES.forEach(function(c){c[2].forEach(function(a){if(a[0]===code)r={code:code,city:a[1],country:c[0],flag:c[1]}})});return r||{code:code,city:code,country:'',flag:''}}
   var WD=['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
   function wx(c){
@@ -605,7 +603,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
   function renderWeather(state,data){
     var ap=wxAp(),inf=apInfo(ap);
     $('nowTitle').textContent='Thời tiết tại '+ap;$('nowTz').textContent=inf.city;
-    $('pvWx').textContent=inf.flag+' '+ap+' – '+inf.city;$('wxSel').value=ap;
+    $('pvWx').textContent=inf.flag+' '+ap+' – '+inf.city;$('wxSel').value=ap;$('wxPickRow').hidden=!!(S.flight.dest&&AP_GEO[S.flight.dest]);
     var box=$('nowDays');
     if(state==='loading'){box.innerHTML='<p class="tiny" style="grid-column:1/-1">Đang tải thời tiết…</p>';return}
     if(state==='error'){box.innerHTML='<div class="wxerr"><p class="tiny">Không tải được thời tiết, cần có mạng.</p><button type="button" class="btn alt" id="wxRetry">Thử lại</button></div>';return}
@@ -804,9 +802,11 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     buildTypes();
     hydrate(document);
     $('fDate').value=S.flight.date;$('fTime').value=S.flight.time;
-    $('fDest').value=S.flight.dest||'';$('fRetDate').value=S.flight.retDate||'';$('fRetTime').value=S.flight.retTime||'';
-    $('destList').innerHTML=COUNTRIES.map(function(c){return c[2].map(function(a){return '<option value="'+a[0]+'">'+esc(a[1])+' · '+esc(c[0])+'</option>'}).join('')}).join('');
-    $('fDest').addEventListener('input',function(e){S.flight.dest=e.target.value;save();renderShare()});
+    var apOpts=function(empty){return (empty?'<option value="">Chưa chọn</option>':'')+COUNTRIES.map(function(c){return '<optgroup label="'+esc(c[1]+' '+c[0])+'">'+c[2].filter(function(a){return AP_GEO[a[0]]}).map(function(a){return '<option value="'+a[0]+'">'+a[0]+' – '+esc(a[1])+'</option>'}).join('')+'</optgroup>'}).join('')};
+    var dd=String(S.flight.dest||'').trim().toUpperCase();S.flight.dest=AP_GEO[dd]?dd:'';
+    $('fDest').innerHTML=apOpts(true);$('fDest').value=S.flight.dest;
+    $('fRetDate').value=S.flight.retDate||'';$('fRetTime').value=S.flight.retTime||'';
+    $('fDest').addEventListener('change',function(e){S.flight.dest=e.target.value;save();renderCalc()});
     $('fRetDate').addEventListener('input',function(e){S.flight.retDate=e.target.value;save();syncPV();renderShare()});
     $('fRetTime').addEventListener('input',function(e){S.flight.retTime=e.target.value;save();syncPV();renderShare()});
     ['fRetDate','fRetTime'].forEach(function(id){$(id).addEventListener('click',function(e){try{if(e.target.showPicker)e.target.showPicker()}catch(x){}})});
@@ -834,7 +834,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
       var c=b.dataset.c;if(S.visited[c])delete S.visited[c];else S.visited[c]=true;
       save();renderCheckin();renderProfile();
     });
-    $('wxSel').innerHTML=COUNTRIES.map(function(c){return '<optgroup label="'+esc(c[1]+' '+c[0])+'">'+c[2].filter(function(a){return AP_GEO[a[0]]}).map(function(a){return '<option value="'+a[0]+'">'+a[0]+' – '+esc(a[1])+'</option>'}).join('')+'</optgroup>'}).join('');
+    $('wxSel').innerHTML=apOpts(false);
     $('wxSel').addEventListener('change',function(e){S.wxAp=e.target.value;save();wxKey=wxAp();loadWeather()});
     renderTheme();
     $('themeSw').addEventListener('click',function(e){
