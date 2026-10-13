@@ -648,5 +648,6 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
 })();
 </script>
 
+<script>if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').then(function(r){r.update()}).catch(function(){})});</script>
 </body>
 </html>
