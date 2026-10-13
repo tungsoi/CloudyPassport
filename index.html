@@ -466,7 +466,8 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     var rows=[{ic:'🚐',label:'Xe đón',time:fmtT(r.pick),date:dm(r.pick),c:'pick'},{ic:'🛫',label:'Cất cánh',time:fmtT(r.dep),date:dm(r.dep),c:'dep'}];
     var rd=f.retDate?new Date(f.retDate+'T00:00:00'):null;if(rd&&isNaN(rd))rd=null;
     if(rd||f.retTime)rows.push({ic:'🏠',label:'Dự kiến về',time:f.retTime||'',date:rd?dm(rd):'',c:'ret'});
-    return {when:when,name:name,dest:dest,rows:rows};
+    var ai=(f.dest&&AP_GEO[f.dest])?apInfo(f.dest):null;
+    return {when:when,name:name,dest:dest,ai:ai,rows:rows};
   }
   function shareText(){
     var P=shareParts();if(!P)return '';
@@ -483,7 +484,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
   function drawCard(av){
     var P=shareParts(),cv=$('shImg'),W=1080,F='"Be Vietnam Pro","Segoe UI",system-ui,-apple-system,sans-serif';
     if(!P)return;
-    var M=28,HH=236,RH=106,GAP=16,hasD=!!P.dest,rowsY=M+HH+(hasD?160:50),n=P.rows.length;
+    var M=28,HH=236,RH=106,GAP=16,hasD=!!P.dest,rowsY=M+HH+(hasD?176:50),n=P.rows.length;
     var H=rowsY+n*(RH+GAP)-GAP+112;
     cv.width=W;cv.height=H;var c=cv.getContext('2d');
     var bg=c.createLinearGradient(0,0,0,H);bg.addColorStop(0,cssv('--bg1'));bg.addColorStop(1,cssv('--bg2'));c.fillStyle=bg;c.fillRect(0,0,W,H);
@@ -504,8 +505,11 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     if(nm){c.fillStyle=cssv('--navy');c.font='700 56px '+F;c.fillText(nm,tx,cy-4);c.fillStyle=cssv('--sub');c.font='600 38px '+F;c.fillText(line,tx,cy+54)}
     else{c.fillStyle=cssv('--navy');c.font='700 50px '+F;c.fillText(line,tx,cy+18)}
     if(hasD){
-      var fs=96;c.fillStyle=cssv('--ink');do{c.font='700 '+fs+'px '+F;fs-=4}while(c.measureText('✈  '+P.dest).width>W-140&&fs>40);
-      c.textAlign='center';c.fillText(P.dest,W/2,M+HH+112);
+      var city=P.ai?P.ai.city:P.dest,fl=P.ai&&P.ai.flag?P.ai.flag+'  ':'',fs=72;
+      c.fillStyle=cssv('--ink');c.textAlign='center';
+      do{c.font='700 '+fs+'px '+F;fs-=4}while(c.measureText(fl+city).width>W-160&&fs>36);
+      c.fillText(fl+city,W/2,M+HH+88);
+      if(P.ai){c.fillStyle=cssv('--muted');c.font='600 34px '+F;c.fillText(P.ai.country+'  ·  '+P.ai.code,W/2,M+HH+138)}
     }
     var y=rowsY,colors={pick:['--amber-soft','--amber-ink'],dep:['--sky-soft','--sky-ink'],ret:['--accent-soft','--navy']},x0=M+36;
     P.rows.forEach(function(x){
