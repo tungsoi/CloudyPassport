@@ -206,7 +206,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
         <label for="fTime">Giờ cất cánh<span class="fld"><span class="pv" id="pvTime"></span><input id="fTime" type="time"></span></label>
         <label for="fDate">Ngày bay<span class="fld"><span class="pv" id="pvDate"></span><input id="fDate" type="date"></span></label>
       </div>
-      <label class="chk" for="fStay"><input id="fStay" type="checkbox"><span>Có ngủ lại (xe đón sớm thêm 15 phút)</span></label>
+      <label class="chk" id="fStayRow" for="fStay"><input id="fStay" type="checkbox"><span>Có ngủ lại (xe đón sớm thêm 15 phút)</span></label>
     </div>
   </section>
 
@@ -355,8 +355,9 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     brf:[105,100,105,115,125,155,85,140,75,85,115,90],
     term:['Nhà ga T3','Nhà ga T2','Nhà ga T2','Nhà ga T2','Nhà ga T2','Nhà ga T2','Nhà ga T3','Nhà ga T3','Nhà ga T1','Nhà ga T2','Nhà ga T3','Nhà ga T3']
   };
-  var STAY={HAN:['2'],SGN:['3','4','5','10']};
-  function defStay(){return (STAY[S.base]||[]).indexOf(String(S.flight.ft))>-1}
+  var STAY={HAN:['2'],SGN:['3']};
+  function canStay(){return (STAY[S.base]||[]).indexOf(String(S.flight.ft))>-1}
+  function defStay(){return canStay()}
   function typeLabel(){
     var l=FTYPES[S.base],v=String(S.flight.ft),f=l.filter(function(x){return x[0]===v})[0];
     return (f||l[0])[1];
@@ -367,9 +368,10 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     sel.innerHTML=l.map(function(x){return '<option value="'+x[0]+'">'+esc(x[1])+'</option>'}).join('');
     sel.value=String(S.flight.ft);
     $('fStay').checked=!!S.flight.stay;
+    $('fStayRow').hidden=!canStay();
   }
   function offsets(){
-    var f=S.flight,l=FTYPES[S.base],t=Number(f.ft),extra=f.stay?15:0;
+    var f=S.flight,l=FTYPES[S.base],t=Number(f.ft),extra=(canStay()&&f.stay)?15:0;
     if(!l.some(function(x){return x[0]===String(f.ft)}))t=0;
     if(S.base==='SGN')return {pick:SGN.pickup[t]+extra,brf:SGN.brf[t],term:SGN.term[t]};
     var hour=parseInt((f.time||'0').split(':')[0],10)||0,early=hour<8,pilot=S.role==='pilot',pick=0,brf=0;
@@ -407,6 +409,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     document.querySelectorAll('#roleSeg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.role===S.role))});
     document.querySelectorAll('#baseSeg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.base===S.base))});
     $('roleNote').hidden=S.base!=='SGN';
+    $('fStayRow').hidden=!canStay();
     $('desc').textContent='Lịch chuẩn bị cho '+(S.role==='pilot'?'phi công':'tiếp viên')+' bay '+typeLabel()+' tại base '+S.base+'.'+(S.flight.stay?' Đã cộng thêm 15 phút trước giờ xe đón (chuyến có ngủ lại).':'');
     if(!r){el.innerHTML='<li class="empty">Chọn ngày và giờ cất cánh để xem giờ xe đón.</li>';tm.hidden=true;return}
     var items=[
