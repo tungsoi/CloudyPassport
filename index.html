@@ -60,6 +60,14 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
 .fld input,.fld select{position:absolute;inset:0;width:100%;height:100%;min-height:0;padding:0;border:0;opacity:0;font-size:16px;-webkit-appearance:none;appearance:none;cursor:pointer}
 .fld:focus-within .pv{outline:2px solid var(--accent);outline-offset:1px}
 [hidden]{display:none!important}
+.nh{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.nh h2{margin:0}
+.now{font-size:44px;font-weight:700;line-height:1.1;letter-spacing:-.03em;color:var(--navy);font-variant-numeric:tabular-nums;margin-bottom:12px}
+.days{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.dy{background:var(--accent-soft);border-radius:14px;padding:10px 12px;min-width:0}
+.dy small{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.dy b{display:block;font-size:15px;font-weight:700;color:var(--ink)}
+.dy span{display:block;font-size:12px;font-weight:600;color:var(--accent-text)}
 .chk{flex-direction:row;align-items:center;gap:12px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
 .chk input{width:24px;height:24px;min-height:0;flex:none;padding:0;accent-color:var(--accent)}
 .tiny{font-size:12px;color:var(--muted);line-height:1.6}
@@ -215,6 +223,12 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     <h2>Timeline</h2>
     <ol class="tl" id="result"></ol>
     <div class="term" id="term" hidden></div>
+  </section>
+
+  <section class="card" id="nowCard" aria-label="Thời gian tại base">
+    <div class="nh"><h2 id="nowTitle">Thời gian tại HAN</h2><span class="rc" id="nowTz">GMT+7</span></div>
+    <div class="now" id="nowClock">--:--</div>
+    <div class="days" id="nowDays"></div>
   </section>
   <div class="foot" aria-hidden="true">
     <svg viewBox="0 0 240 72" width="240" height="72">
@@ -405,7 +419,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     $('pvDate').textContent=(dt&&!isNaN(dt))?d.split('-').reverse().join('/')+' ('+WD[dt.getDay()]+')':'Chọn ngày';
   }
   function renderCalc(){
-    var r=compute(),el=$('result'),tm=$('term');syncPV();
+    var r=compute(),el=$('result'),tm=$('term');syncPV();renderNow();
     document.querySelectorAll('#roleSeg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.role===S.role))});
     document.querySelectorAll('#baseSeg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.base===S.base))});
     $('roleNote').hidden=S.base!=='SGN';
@@ -423,6 +437,28 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     el.innerHTML=ev(items[0],'first')+gp('')+ev(items[1])+gp('')+ev({ic:'plane',label:'Cất cánh',sub:'Giờ địa phương',cls:'dep',d:r.dep},'last');
     if(r.o.term){tm.innerHTML='<span class="ic" data-icon="pin"></span><div><div class="lbl">Điểm đến</div><b>'+esc(r.o.term)+'</b></div>';tm.hidden=false}else{tm.hidden=true}
     hydrate(el);hydrate(tm);
+  }
+
+  /* ---------- time at base ---------- */
+  var BASE_TZ={HAN:'Asia/Ho_Chi_Minh',SGN:'Asia/Ho_Chi_Minh'};
+  var WD=['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
+  function baseNow(){
+    var tz=BASE_TZ[S.base]||'Asia/Ho_Chi_Minh',o={};
+    try{
+      new Intl.DateTimeFormat('en-GB',{timeZone:tz,hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).formatToParts(new Date()).forEach(function(p){o[p.type]=p.value});
+    }catch(e){var n=new Date(Date.now()+(new Date().getTimezoneOffset()+420)*6e4);o={year:n.getFullYear(),month:('0'+(n.getMonth()+1)).slice(-2),day:('0'+n.getDate()).slice(-2),hour:('0'+n.getHours()).slice(-2),minute:('0'+n.getMinutes()).slice(-2)}}
+    return o;
+  }
+  function renderNow(){
+    var o=baseNow(),y=+o.year,m=+o.month,d=+o.day;
+    $('nowTitle').textContent='Thời gian tại '+S.base;
+    $('nowClock').textContent=o.hour+':'+o.minute;
+    var cell=function(label,add){
+      var t=new Date(Date.UTC(y,m-1,d+add)),ds=t.getUTCFullYear()+'-'+('0'+(t.getUTCMonth()+1)).slice(-2)+'-'+('0'+t.getUTCDate()).slice(-2);
+      var fly=S.flight&&S.flight.date===ds;
+      return '<div class="dy"><small>'+label+'</small><b>'+WD[t.getUTCDay()]+'</b><span>'+('0'+t.getUTCDate()).slice(-2)+'/'+('0'+(t.getUTCMonth()+1)).slice(-2)+'/'+t.getUTCFullYear()+(fly?' · Ngày bay':'')+'</span></div>';
+    };
+    $('nowDays').innerHTML=cell('Hôm nay',0)+cell('Ngày mai',1);
   }
 
   /* ---------- check-in ---------- */
@@ -642,6 +678,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     });
     openForm(S.profile);
     applyTheme(S.theme);
+    setInterval(renderNow,20000);
     renderCalc();renderCheckin();renderProfile();show(S.tab);
   }
   init();
