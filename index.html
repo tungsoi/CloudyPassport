@@ -62,9 +62,12 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
 [hidden]{display:none!important}
 .nh{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .nh h2{margin:0}
-.now{font-size:44px;font-weight:700;line-height:1.1;letter-spacing:-.03em;color:var(--navy);font-variant-numeric:tabular-nums;margin-bottom:12px}
 .days{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .dy{background:var(--accent-soft);border-radius:14px;padding:10px 12px;min-width:0}
+.wx{display:flex;align-items:center;gap:8px;margin:4px 0 2px}
+.we{font-size:26px;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+.wx b{font-size:20px;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.dy .dd{margin-top:6px;text-transform:none;letter-spacing:0;font-weight:600}
 .dy small{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .dy b{display:block;font-size:15px;font-weight:700;color:var(--ink)}
 .dy span{display:block;font-size:12px;font-weight:600;color:var(--accent-text)}
@@ -225,9 +228,8 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     <div class="term" id="term" hidden></div>
   </section>
 
-  <section class="card" id="nowCard" aria-label="Thời gian tại base">
-    <div class="nh"><h2 id="nowTitle">Thời gian tại HAN</h2><span class="rc" id="nowTz">GMT+7</span></div>
-    <div class="now" id="nowClock">--:--</div>
+  <section class="card" id="nowCard" aria-label="Thời tiết tại base" aria-live="polite">
+    <div class="nh"><h2 id="nowTitle">Thời tiết tại HAN</h2><span class="rc" id="nowTz">Nội Bài</span></div>
     <div class="days" id="nowDays"></div>
   </section>
   <div class="foot" aria-hidden="true">
@@ -419,7 +421,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     $('pvDate').textContent=(dt&&!isNaN(dt))?d.split('-').reverse().join('/')+' ('+WD[dt.getDay()]+')':'Chọn ngày';
   }
   function renderCalc(){
-    var r=compute(),el=$('result'),tm=$('term');syncPV();renderNow();
+    var r=compute(),el=$('result'),tm=$('term');syncPV();if(wxBase!==S.base){wxBase=S.base;loadWeather()}else renderNow();
     document.querySelectorAll('#roleSeg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.role===S.role))});
     document.querySelectorAll('#baseSeg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.base===S.base))});
     $('roleNote').hidden=S.base!=='SGN';
@@ -439,27 +441,50 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     hydrate(el);hydrate(tm);
   }
 
-  /* ---------- time at base ---------- */
-  var BASE_TZ={HAN:'Asia/Ho_Chi_Minh',SGN:'Asia/Ho_Chi_Minh'};
+  /* ---------- weather at base (Open-Meteo, no key) ---------- */
+  var BASE_GEO={HAN:{lat:21.2212,lon:105.8072,n:'Nội Bài'},SGN:{lat:10.8188,lon:106.652,n:'Tân Sơn Nhất'}};
   var WD=['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
-  function baseNow(){
-    var tz=BASE_TZ[S.base]||'Asia/Ho_Chi_Minh',o={};
-    try{
-      new Intl.DateTimeFormat('en-GB',{timeZone:tz,hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).formatToParts(new Date()).forEach(function(p){o[p.type]=p.value});
-    }catch(e){var n=new Date(Date.now()+(new Date().getTimezoneOffset()+420)*6e4);o={year:n.getFullYear(),month:('0'+(n.getMonth()+1)).slice(-2),day:('0'+n.getDate()).slice(-2),hour:('0'+n.getHours()).slice(-2),minute:('0'+n.getMinutes()).slice(-2)}}
-    return o;
+  function wx(c){
+    if(c===0)return ['☀️','Trời quang'];
+    if(c===1)return ['🌤️','Ít mây'];
+    if(c===2)return ['⛅','Có mây'];
+    if(c===3)return ['☁️','Nhiều mây'];
+    if(c===45||c===48)return ['🌫️','Sương mù'];
+    if(c>=51&&c<=57)return ['🌦️','Mưa phùn'];
+    if(c>=61&&c<=67)return ['🌧️','Mưa'];
+    if(c>=71&&c<=77)return ['🌨️','Tuyết'];
+    if(c>=80&&c<=82)return ['🌦️','Mưa rào'];
+    if(c>=95)return ['⛈️','Dông'];
+    return ['🌡️','Không rõ'];
   }
-  function renderNow(){
-    var o=baseNow(),y=+o.year,m=+o.month,d=+o.day;
-    $('nowTitle').textContent='Thời gian tại '+S.base;
-    $('nowClock').textContent=o.hour+':'+o.minute;
-    var cell=function(label,add){
-      var t=new Date(Date.UTC(y,m-1,d+add)),ds=t.getUTCFullYear()+'-'+('0'+(t.getUTCMonth()+1)).slice(-2)+'-'+('0'+t.getUTCDate()).slice(-2);
-      var fly=S.flight&&S.flight.date===ds;
-      return '<div class="dy"><small>'+label+'</small><b>'+WD[t.getUTCDay()]+'</b><span>'+('0'+t.getUTCDate()).slice(-2)+'/'+('0'+(t.getUTCMonth()+1)).slice(-2)+'/'+t.getUTCFullYear()+(fly?' · Ngày bay':'')+'</span></div>';
-    };
-    $('nowDays').innerHTML=cell('Hôm nay',0)+cell('Ngày mai',1);
+  var wxCache={},wxReq=0,wxBase=null;
+  function wxFmtDate(iso){var p=iso.split('-'),t=new Date(Date.UTC(+p[0],+p[1]-1,+p[2]));return {wd:WD[t.getUTCDay()],dm:p[2]+'/'+p[1]}}
+  function renderWeather(state,data){
+    $('nowTitle').textContent='Thời tiết tại '+S.base;
+    var g=BASE_GEO[S.base]||BASE_GEO.HAN;$('nowTz').textContent=g.n;
+    var box=$('nowDays');
+    if(state==='loading'){box.innerHTML='<p class="tiny" style="grid-column:1/-1">Đang tải thời tiết…</p>';return}
+    if(state==='error'){box.innerHTML='<p class="tiny" style="grid-column:1/-1">Không tải được thời tiết (cần có mạng). <button type="button" class="btn alt" id="wxRetry" style="min-height:36px;padding:6px 12px;margin-left:6px">Thử lại</button></p>';return}
+    var d=data.daily,labels=['Hôm nay','Ngày mai'];
+    box.innerHTML=[0,1].map(function(i){
+      if(d.time[i]==null)return '';
+      var w=wx(d.weather_code[i]),dt=wxFmtDate(d.time[i]),rain=d.precipitation_probability_max&&d.precipitation_probability_max[i],fly=S.flight&&S.flight.date===d.time[i];
+      return '<div class="dy"><small>'+labels[i]+'</small><div class="wx"><span class="we" aria-hidden="true">'+w[0]+'</span><b>'+Math.round(d.temperature_2m_min[i])+'°–'+Math.round(d.temperature_2m_max[i])+'°</b></div><span>'+w[1]+(rain!=null?' · mưa '+Math.round(rain)+'%':'')+'</span><small class="dd">'+dt.wd+', '+dt.dm+(fly?' · Ngày bay':'')+'</small></div>';
+    }).join('');
   }
+  function loadWeather(force){
+    var base=S.base,g=BASE_GEO[base]||BASE_GEO.HAN,c=wxCache[base];
+    if(c&&!force&&Date.now()-c.t<18e5){renderWeather('ok',c.d);return}
+    var id=++wxReq;renderWeather('loading');
+    var url='https://api.open-meteo.com/v1/forecast?latitude='+g.lat+'&longitude='+g.lon+'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FHo_Chi_Minh&forecast_days=2';
+    fetch(url).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){
+      if(!j||!j.daily||!j.daily.time)throw 0;
+      wxCache[base]={t:Date.now(),d:j};
+      if(id===wxReq&&S.base===base)renderWeather('ok',j);
+    }).catch(function(){if(id===wxReq)renderWeather('error')});
+  }
+  function renderNow(){var c=wxCache[S.base];if(c)renderWeather('ok',c.d)}
+  document.addEventListener('click',function(e){if(e.target&&e.target.id==='wxRetry')loadWeather(true)});
 
   /* ---------- check-in ---------- */
   /* Config: countries (in display order) with their airports. Edit freely.
@@ -678,7 +703,6 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     });
     openForm(S.profile);
     applyTheme(S.theme);
-    setInterval(renderNow,20000);
     renderCalc();renderCheckin();renderProfile();show(S.tab);
   }
   init();
