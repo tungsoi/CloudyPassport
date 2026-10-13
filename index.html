@@ -126,6 +126,9 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
 .rc{font-size:12px;font-weight:700;color:var(--navy);background:var(--accent-soft);padding:3px 10px;border-radius:999px;font-variant-numeric:tabular-nums}
 .cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:10px}
 .ct{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;padding:12px 6px 10px;border:1px solid var(--line);border-radius:16px;background:var(--field);color:var(--ink);font-family:var(--f);cursor:pointer}
+.ia{font-size:18px;font-weight:700;letter-spacing:.05em;line-height:1.1;color:var(--muted);font-variant-numeric:tabular-nums}
+.ct[aria-pressed="true"] .ia{color:var(--navy)}
+.rh h2 .fl{font-size:22px;filter:none;opacity:1;vertical-align:-3px}
 .fl{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-size:30px;line-height:1;filter:grayscale(1);opacity:.5}
 .cn{font-size:12px;font-weight:600;line-height:1.25;text-align:center;color:var(--muted)}
 .ct[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--violet)}
@@ -142,9 +145,9 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
 .pe{font-size:12px;font-weight:600;color:var(--muted)}
 .prev{display:flex;justify-content:center}
 .prev .av{width:120px;height:120px}
-.nums{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
-.num{background:var(--accent-soft);border-radius:16px;padding:12px 14px}
-.num b{display:block;font-size:32px;font-weight:700;line-height:1.1;letter-spacing:-.02em;color:var(--navy);font-variant-numeric:tabular-nums}
+.nums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.num{background:var(--accent-soft);border-radius:16px;padding:12px 10px}
+.num b{display:block;font-size:24px;font-weight:700;line-height:1.1;letter-spacing:-.02em;color:var(--navy);font-variant-numeric:tabular-nums}
 .num span{font-size:12px;font-weight:600;color:var(--muted)}
 .btns{display:flex;flex-wrap:wrap;gap:10px}
 .btn{font:600 14px var(--f);color:var(--navy);background:var(--sel);border:1px solid var(--btnb);border-radius:14px;padding:10px 18px;min-height:46px;cursor:pointer}
@@ -235,7 +238,8 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
       </div>
       <div class="nums" style="margin-top:16px">
         <div class="num"><b id="sDays">0</b><span>ngày bay</span></div>
-        <div class="num"><b id="sCountries">0/0</b><span>quốc gia đã đến</span></div>
+        <div class="num"><b id="sCountries">0/0</b><span>quốc gia</span></div>
+        <div class="num"><b id="sAirports">0/0</b><span>sân bay</span></div>
       </div>
       <p class="tiny" id="sSpan" style="margin-top:12px"></p>
       <p class="tiny" id="sFirst"></p>
@@ -273,10 +277,10 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
 
   <div class="view" id="v-checkin" hidden>
     <section class="card">
-      <div class="sum-top"><span class="sumN" id="sumN">0</span><span class="sumT">/<span id="sumT">0</span></span><span class="sum-l">quốc gia đã đến</span></div>
-      <div class="bar" id="sumBarWrap" role="progressbar" aria-label="Số quốc gia đã đến" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="sumBar"></i></div>
+      <div class="sum-top"><span class="sumN" id="sumN">0</span><span class="sumT">/<span id="sumT">0</span></span><span class="sum-l">sân bay đã đến</span></div>
+      <div class="bar" id="sumBarWrap" role="progressbar" aria-label="Số sân bay đã đến" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="sumBar"></i></div>
       <p class="tiny" id="sumHint" style="margin-top:10px"></p>
-      <div class="seg three" id="fltSeg" role="group" aria-label="Lọc quốc gia" style="margin-top:14px">
+      <div class="seg three" id="fltSeg" role="group" aria-label="Lọc sân bay" style="margin-top:14px">
         <button type="button" data-f="all" aria-pressed="true">Tất cả</button>
         <button type="button" data-f="yes" aria-pressed="false">Đã đến</button>
         <button type="button" data-f="no" aria-pressed="false">Chưa đến</button>
@@ -420,36 +424,62 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
   }
 
   /* ---------- check-in ---------- */
-  /* Config: main countries by region, [code, Vietnamese name, flag]. Edit this list to add or remove countries. */
-  var REGIONS=[
-    {n:'Việt Nam & Đông Nam Á',c:[['VN','Việt Nam','🇻🇳'],['TH','Thái Lan','🇹🇭'],['SG','Singapore','🇸🇬'],['MY','Malaysia','🇲🇾'],['ID','Indonesia','🇮🇩'],['PH','Philippines','🇵🇭'],['KH','Campuchia','🇰🇭'],['LA','Lào','🇱🇦'],['MM','Myanmar','🇲🇲']]},
-    {n:'Đông Á & Nam Á',c:[['KR','Hàn Quốc','🇰🇷'],['JP','Nhật Bản','🇯🇵'],['CN','Trung Quốc','🇨🇳'],['TW','Đài Loan','🇹🇼'],['HK','Hồng Kông','🇭🇰'],['IN','Ấn Độ','🇮🇳']]},
-    {n:'Châu Âu',c:[['FR','Pháp','🇫🇷'],['GB','Anh','🇬🇧'],['DE','Đức','🇩🇪'],['IT','Ý','🇮🇹'],['CZ','Séc','🇨🇿'],['RU','Nga','🇷🇺']]},
-    {n:'Châu Úc',c:[['AU','Úc','🇦🇺']]},
-    {n:'Châu Mỹ',c:[['US','Mỹ','🇺🇸'],['CA','Canada','🇨🇦']]}
+  /* Config: countries (in display order) with their airports. Edit freely.
+     Country: [name, flag, [[IATA, city], ...]]. Visits are stored per airport IATA code. */
+  var COUNTRIES=[
+    ['Việt Nam','🇻🇳',[['HAN','Hà Nội'],['SGN','TP. Hồ Chí Minh'],['DAD','Đà Nẵng'],['CXR','Nha Trang'],['PQC','Phú Quốc'],['HPH','Hải Phòng'],['VII','Vinh'],['HUI','Huế'],['DLI','Đà Lạt'],['VCA','Cần Thơ'],['UIH','Quy Nhơn'],['THD','Thanh Hóa'],['VDO','Vân Đồn'],['BMV','Buôn Ma Thuột'],['PXU','Pleiku'],['VCS','Côn Đảo'],['TBB','Tuy Hòa'],['VDH','Đồng Hới'],['VCL','Chu Lai'],['DIN','Điện Biên'],['VKG','Rạch Giá'],['CAH','Cà Mau']]],
+    ['Thái Lan','🇹🇭',[['BKK','Bangkok'],['DMK','Bangkok (Don Mueang)'],['HKT','Phuket'],['CNX','Chiang Mai']]],
+    ['Singapore','🇸🇬',[['SIN','Singapore']]],
+    ['Malaysia','🇲🇾',[['KUL','Kuala Lumpur']]],
+    ['Indonesia','🇮🇩',[['CGK','Jakarta'],['DPS','Bali']]],
+    ['Philippines','🇵🇭',[['MNL','Manila']]],
+    ['Campuchia','🇰🇭',[['PNH','Phnom Penh'],['REP','Siem Reap']]],
+    ['Lào','🇱🇦',[['VTE','Viêng Chăn'],['LPQ','Luang Prabang']]],
+    ['Myanmar','🇲🇲',[['RGN','Yangon']]],
+    ['Hàn Quốc','🇰🇷',[['ICN','Seoul'],['PUS','Busan']]],
+    ['Nhật Bản','🇯🇵',[['NRT','Tokyo (Narita)'],['HND','Tokyo (Haneda)'],['KIX','Osaka'],['NGO','Nagoya'],['FUK','Fukuoka'],['CTS','Sapporo']]],
+    ['Trung Quốc','🇨🇳',[['PEK','Bắc Kinh'],['PVG','Thượng Hải'],['CAN','Quảng Châu'],['CTU','Thành Đô'],['KMG','Côn Minh']]],
+    ['Đài Loan','🇹🇼',[['TPE','Đài Bắc'],['KHH','Cao Hùng'],['RMQ','Đài Trung']]],
+    ['Hồng Kông','🇭🇰',[['HKG','Hồng Kông']]],
+    ['Ấn Độ','🇮🇳',[['DEL','Delhi'],['BOM','Mumbai']]],
+    ['Pháp','🇫🇷',[['CDG','Paris']]],
+    ['Anh','🇬🇧',[['LHR','London']]],
+    ['Đức','🇩🇪',[['FRA','Frankfurt']]],
+    ['Ý','🇮🇹',[['FCO','Roma'],['MXP','Milan']]],
+    ['Séc','🇨🇿',[['PRG','Praha']]],
+    ['Nga','🇷🇺',[['SVO','Moscow']]],
+    ['Úc','🇦🇺',[['SYD','Sydney'],['MEL','Melbourne']]],
+    ['Mỹ','🇺🇸',[['SFO','San Francisco'],['LAX','Los Angeles']]],
+    ['Canada','🇨🇦',[['YVR','Vancouver']]]
   ];
   var filter='all';
+  function stats(){
+    var ap=0,apDone=0,co=COUNTRIES.length,coDone=0;
+    COUNTRIES.forEach(function(c){
+      var d=0;c[2].forEach(function(a){ap++;if(S.visited[a[0]]){apDone++;d++}});
+      if(d)coDone++;
+    });
+    return {ap:ap,apDone:apDone,co:co,coDone:coDone};
+  }
   var CHECK='<svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.3l2.4 2.4 4.6-5"/></svg>';
-  function tile(c){
-    var on=!!S.visited[c[0]];
-    return '<button type="button" class="ct" data-c="'+c[0]+'" aria-pressed="'+on+'"><span class="fl" aria-hidden="true">'+c[2]+'</span><span class="cn">'+esc(c[1])+'</span>'+(on?'<i class="ck">'+CHECK+'</i>':'')+'</button>';
+  function tile(a){
+    var on=!!S.visited[a[0]];
+    return '<button type="button" class="ct" data-c="'+a[0]+'" aria-pressed="'+on+'" aria-label="'+esc(a[1])+' ('+a[0]+')"><span class="ia" aria-hidden="true">'+a[0]+'</span><span class="cn">'+esc(a[1])+'</span>'+(on?'<i class="ck">'+CHECK+'</i>':'')+'</button>';
   }
   function renderCheckin(){
-    var total=0,done=0;
-    REGIONS.forEach(function(r){r.c.forEach(function(c){total++;if(S.visited[c[0]])done++})});
-    var pct=total?Math.round(done/total*100):0;
-    $('sumN').textContent=done;$('sumT').textContent=total;
+    var st=stats(),pct=st.ap?Math.round(st.apDone/st.ap*100):0;
+    $('sumN').textContent=st.apDone;$('sumT').textContent=st.ap;
     $('sumBar').style.width=pct+'%';$('sumBarWrap').setAttribute('aria-valuenow',String(pct));
-    $('sumHint').textContent=done?('Đã đi '+pct+'% số quốc gia trong danh sách. Chạm vào quốc gia để bật hoặc tắt.'):'Chạm vào quốc gia để đánh dấu đã đến.';
+    $('sumHint').textContent=st.apDone?('Đã đến '+st.coDone+'/'+st.co+' quốc gia. Chạm vào sân bay để bật hoặc tắt.'):'Chạm vào sân bay để đánh dấu đã đến.';
     document.querySelectorAll('#fltSeg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.f===filter))});
     var out='';
-    REGIONS.forEach(function(r){
-      var list=r.c.filter(function(c){return filter==='all'||(filter==='yes')===!!S.visited[c[0]]});
+    COUNTRIES.forEach(function(c){
+      var list=c[2].filter(function(a){return filter==='all'||(filter==='yes')===!!S.visited[a[0]]});
       if(!list.length)return;
-      var d=r.c.filter(function(c){return S.visited[c[0]]}).length;
-      out+='<section class="card"><div class="rh"><h2>'+esc(r.n)+'</h2><span class="rc">'+d+'/'+r.c.length+'</span></div><div class="cgrid">'+list.map(tile).join('')+'</div></section>';
+      var d=c[2].filter(function(a){return S.visited[a[0]]}).length;
+      out+='<section class="card"><div class="rh"><h2><span class="fl" aria-hidden="true">'+c[1]+'</span> '+esc(c[0])+'</h2><span class="rc">'+d+'/'+c[2].length+'</span></div><div class="cgrid">'+list.map(tile).join('')+'</div></section>';
     });
-    $('regions').innerHTML=out||'<section class="card"><p class="empty">Chưa có quốc gia nào ở mục này.</p></section>';
+    $('regions').innerHTML=out||'<section class="card"><p class="empty">Chưa có sân bay nào ở mục này.</p></section>';
   }
   function show(tab){
     S.tab=tab;save();
@@ -544,13 +574,12 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     $('pShow').hidden=!view;$('pForm').hidden=view;
     if(!view)return;
     var t=new Date(),t0=new Date(t.getFullYear(),t.getMonth(),t.getDate()),f=new Date(p.first+'T00:00:00');
-    var days=Math.max(0,Math.round((t0-f)/864e5)),sp=span(f<=t0?f:t0,t0),done=0,total=0;
-    REGIONS.forEach(function(r){r.c.forEach(function(c){total++;if(S.visited[c[0]])done++})});
+    var days=Math.max(0,Math.round((t0-f)/864e5)),sp=span(f<=t0?f:t0,t0),st=stats();
     $('sAv').innerHTML=avatarSVG(p.avatar);
     $('sNick').textContent=p.nick+' '+p.icon;
     $('sEmp').textContent=p.emp?('Mã nhân viên: '+p.emp):'';$('sEmp').hidden=!p.emp;
     $('sDays').textContent=days.toLocaleString('vi-VN');
-    $('sCountries').textContent=done+'/'+total;
+    $('sCountries').textContent=st.coDone+'/'+st.co;$('sAirports').textContent=st.apDone+'/'+st.ap;
     $('sSpan').textContent=days===0?'Hôm nay là ngày bay đầu tiên của bạn.':sp.y+' năm '+sp.m+' tháng '+sp.d+' ngày kể từ chuyến bay đầu tiên.';
     $('sFirst').textContent='Chuyến bay đầu tiên: '+fmtFull(p.first)+(p.route?' · '+p.route:'');
   }
