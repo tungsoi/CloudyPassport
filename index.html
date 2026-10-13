@@ -77,14 +77,14 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
 .tiny a{color:var(--accent-text);font-weight:600}
 
 .tl{list-style:none;margin:0;padding:0}
-.ev,.gp{display:grid;grid-template-columns:96px 36px minmax(0,1fr);column-gap:10px;align-items:center}
+.ev,.gp{display:grid;grid-template-columns:104px 36px minmax(0,1fr);column-gap:10px;align-items:center}
 .ev{padding:10px 8px;margin-inline:-8px;border-radius:14px}
 .ev.pick{background:var(--amber-soft)}
 .t b{display:block;font-size:24px;font-weight:700;line-height:1.1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .ev.pick .t b{font-size:30px;color:var(--amber-ink)}
 .ev.brf .t b{color:var(--violet-ink)}
 .ev.dep .t b{color:var(--sky-ink)}
-.t span{display:block;margin-top:2px;font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
+.t span{display:block;margin-top:2px;font-size:11px;font-weight:600;color:var(--muted);white-space:normal;line-height:1.3}
 .t .warn{color:var(--warn)}
 .rail{align-self:stretch;position:relative;display:grid;place-items:center}
 .rail::before{content:"";position:absolute;left:50%;top:-10px;bottom:-10px;border-left:2px solid var(--line);transform:translateX(-1px)}
@@ -433,7 +433,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     ].sort(function(a,b){return a.d-b.d});
     var ev=function(it,pos){
       var off=dayDiff(it.d,r.dep);
-      return '<li class="ev'+(it.cls?' '+it.cls:'')+(pos?' '+pos:'')+'"><div class="t"><b>'+fmtT(it.d)+'</b><span'+(off<0?' class="warn"':'')+'>'+fmtD(it.d)+(off<0?' · hôm trước':'')+'</span></div><div class="rail"><i class="dot" data-icon="'+it.ic+'"></i></div><div class="d"><b>'+it.label+'</b><span>'+it.sub+'</span></div></li>';
+      return '<li class="ev'+(it.cls?' '+it.cls:'')+(pos?' '+pos:'')+'"><div class="t"><b>'+fmtT(it.d)+'</b><span'+(off<0?' class="warn"':'')+'>'+fmtD(it.d)+(off<0?'<br>hôm trước':'')+'</span></div><div class="rail"><i class="dot" data-icon="'+it.ic+'"></i></div><div class="d"><b>'+it.label+'</b><span>'+it.sub+'</span></div></li>';
     };
     var gp=function(txt){return '<li class="gp"><div></div><div class="rail"></div><div class="g">'+txt+'</div></li>'};
     el.innerHTML=ev(items[0],'first')+gp('')+ev(items[1])+gp('')+ev({ic:'plane',label:'Cất cánh',sub:'Giờ địa phương',cls:'dep',d:r.dep},'last');
