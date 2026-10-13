@@ -212,7 +212,6 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
 
   <section class="card" aria-live="polite">
     <h2>Kết quả</h2>
-    <p class="tiny" id="desc" style="margin:-6px 0 12px"></p>
     <ol class="tl" id="result"></ol>
     <div class="term" id="term" hidden></div>
   </section>
@@ -410,7 +409,6 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
     document.querySelectorAll('#baseSeg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.base===S.base))});
     $('roleNote').hidden=S.base!=='SGN';
     $('fStayRow').hidden=!canStay();
-    $('desc').textContent='Lịch chuẩn bị cho '+(S.role==='pilot'?'phi công':'tiếp viên')+' bay '+typeLabel()+' tại base '+S.base+'.'+(S.flight.stay?' Đã cộng thêm 15 phút trước giờ xe đón (chuyến có ngủ lại).':'');
     if(!r){el.innerHTML='<li class="empty">Chọn ngày và giờ cất cánh để xem giờ xe đón.</li>';tm.hidden=true;return}
     var items=[
       {ic:'van',label:'Xe đón',sub:'Trước bay '+fmtDur(r.o.pick),cls:'pick',d:r.pick},
@@ -421,7 +419,7 @@ select{appearance:auto;cursor:pointer;text-overflow:ellipsis}
       return '<li class="ev'+(it.cls?' '+it.cls:'')+(pos?' '+pos:'')+'"><div class="t"><b>'+fmtT(it.d)+'</b><span'+(off<0?' class="warn"':'')+'>'+fmtD(it.d)+(off<0?' · hôm trước':'')+'</span></div><div class="rail"><i class="dot" data-icon="'+it.ic+'"></i></div><div class="d"><b>'+it.label+'</b><span>'+it.sub+'</span></div></li>';
     };
     var gp=function(txt){return '<li class="gp"><div></div><div class="rail"></div><div class="g">'+txt+'</div></li>'};
-    el.innerHTML=ev(items[0],'first')+gp('Cách nhau '+fmtDur(Math.abs(r.o.pick-r.o.brf)))+ev(items[1])+gp('')+ev({ic:'plane',label:'Cất cánh',sub:'Giờ địa phương',cls:'dep',d:r.dep},'last');
+    el.innerHTML=ev(items[0],'first')+gp('')+ev(items[1])+gp('')+ev({ic:'plane',label:'Cất cánh',sub:'Giờ địa phương',cls:'dep',d:r.dep},'last');
     if(r.o.term){tm.innerHTML='<span class="ic" data-icon="pin"></span><div><div class="lbl">Điểm đến</div><b>'+esc(r.o.term)+'</b></div>';tm.hidden=false}else{tm.hidden=true}
     hydrate(el);hydrate(tm);
   }
